@@ -1,0 +1,1825 @@
+import { useState, useEffect, useCallback } from "react";
+
+// ============================================================
+// GLOBAL STYLES
+// ============================================================
+const GlobalStyle = () => (
+  <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
+    
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --bg: #f0f2f7;
+      --bg2: #e8ebf2;
+      --bg3: #dde1ea;
+      --card: #ffffff;
+      --card2: #f7f8fc;
+      --border: #d0d5e2;
+      --accent: #5b4fd4;
+      --accent2: #7c6af0;
+      --green: #0f9b6a;
+      --red: #d94040;
+      --yellow: #c47d00;
+      --blue: #2563eb;
+      --pink: #c2286a;
+      --text: #1a1d2e;
+      --text2: #3d4460;
+      --text3: #6b7299;
+    }
+    
+    body { 
+      font-family: 'Syne', sans-serif; 
+      background: var(--bg); 
+      color: var(--text);
+      min-height: 100vh;
+    }
+    
+    .mono { font-family: 'DM Mono', monospace; }
+    
+    input, select, textarea {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+    
+    button {
+      font-family: 'Syne', sans-serif;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+    
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      padding: 8px 16px;
+    }
+    .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+    
+    .btn-ghost {
+      background: transparent;
+      color: var(--text2);
+      padding: 8px 16px;
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    
+    .btn-danger {
+      background: rgba(217,64,64,0.1);
+      color: var(--red);
+      padding: 6px 12px;
+      border: 1px solid rgba(217,64,64,0.3);
+    }
+    .btn-danger:hover { background: rgba(217,64,64,0.2); }
+    
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+    
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    
+    .scrollbar-thin::-webkit-scrollbar { width: 4px; height: 4px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      width: 90%;
+      max-width: 520px;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    
+    label { font-size: 12px; color: var(--text2); font-weight: 600; display: block; margin-bottom: 4px; }
+    .form-group { margin-bottom: 14px; }
+    
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    
+    .badge-green { background: rgba(15,155,106,0.12); color: var(--green); border: 1px solid rgba(15,155,106,0.3); }
+    .badge-red { background: rgba(217,64,64,0.1); color: var(--red); border: 1px solid rgba(217,64,64,0.3); }
+    .badge-yellow { background: rgba(196,125,0,0.1); color: var(--yellow); border: 1px solid rgba(196,125,0,0.3); }
+    .badge-blue { background: rgba(37,99,235,0.1); color: var(--blue); border: 1px solid rgba(37,99,235,0.25); }
+    .badge-purple { background: rgba(91,79,212,0.1); color: var(--accent); border: 1px solid rgba(91,79,212,0.25); }
+    .badge-pink { background: rgba(194,40,106,0.1); color: var(--pink); border: 1px solid rgba(194,40,106,0.25); }
+  `}</style>
+);
+
+// ============================================================
+// INITIAL DATA
+// ============================================================
+const initialData = {
+  accounts: [
+    { id: "acc1", name: "玉山銀行（主帳戶）", type: "main", balance: 45000, color: "#7c6af0" },
+    { id: "acc2", name: "國泰世華", type: "sub", balance: 12000, color: "#60a5fa" },
+    { id: "acc3", name: "現金", type: "cash", balance: 3500, color: "#34d399" },
+  ],
+  creditCards: [
+    { id: "cc1", name: "玉山 Pi 卡", color: "#f472b6", billingDay: 25, dueDay: 15, currentBill: 8500, paid: false },
+    { id: "cc2", name: "國泰 CUBE", color: "#fbbf24", billingDay: 20, dueDay: 10, currentBill: 3200, paid: true },
+    { id: "cc3", name: "台新 @GoGo", color: "#34d399", billingDay: 15, dueDay: 5, currentBill: 1800, paid: false },
+  ],
+  subscriptions: [
+    { id: "sub1", name: "Netflix", amount: 270, cycle: "monthly", day: 15, cardId: "cc1", category: "娛樂", shared: false, sharedWith: [], active: true },
+    { id: "sub2", name: "YouTube Premium", amount: 179, cycle: "monthly", day: 8, cardId: "cc2", category: "娛樂", shared: true, sharedWith: [{ name: "小明", amount: 90 }], active: true },
+    { id: "sub3", name: "Spotify", amount: 149, cycle: "monthly", day: 1, cardId: "cc1", category: "娛樂", shared: false, sharedWith: [], active: true },
+    { id: "sub4", name: "iCloud 50GB", amount: 30, cycle: "monthly", day: 5, cardId: "cc1", category: "工具", shared: false, sharedWith: [], active: true },
+    { id: "sub5", name: "ChatGPT Plus", amount: 620, cycle: "monthly", day: 20, cardId: "cc2", category: "工具", shared: false, sharedWith: [], active: true },
+  ],
+  transactions: [
+    { id: "t1", date: "2025-03-01", amount: -120, category: "餐飲", subcategory: "午餐", note: "便當", accountId: "acc3", type: "expense", splitGroup: null },
+    { id: "t2", date: "2025-03-02", amount: -680, category: "交通", subcategory: "機車", note: "加油", cardId: "cc1", accountId: null, type: "expense", splitGroup: null },
+    { id: "t3", date: "2025-03-03", amount: 52000, category: "收入", subcategory: "薪資", note: "2月薪水", accountId: "acc1", type: "income", splitGroup: null },
+    { id: "t4", date: "2025-03-05", amount: -320, category: "餐飲", subcategory: "晚餐", note: "聚餐代墊", accountId: "acc3", type: "expense", splitGroup: "g1" },
+    { id: "t5", date: "2025-03-08", amount: -2800, category: "購物", subcategory: "衣物", note: "外套", cardId: "cc1", accountId: null, type: "expense", splitGroup: null },
+    { id: "t6", date: "2025-03-10", amount: -450, category: "貓咪", subcategory: "飼料", note: "皇家飼料", cardId: "cc2", accountId: null, type: "expense", splitGroup: null },
+    { id: "t7", date: "2025-03-10", amount: -1280, category: "學校", subcategory: "課程費", note: "Python課程 均攤", accountId: "acc1", type: "expense", splitGroup: "g2" },
+  ],
+  debtRecords: [
+    { id: "d1", type: "owed_to_me", person: "小明", amount: 1600, date: "2025-03-05", note: "聚餐代墊", settled: false },
+    { id: "d2", type: "i_owe", person: "阿華", amount: 500, date: "2025-02-20", note: "車錢", settled: true },
+    { id: "d3", type: "owed_to_me", person: "同學A", amount: 640, date: "2025-03-10", note: "Python課程均攤", settled: false },
+  ],
+  budgets: [
+    { id: "b1", category: "餐飲", monthlyLimit: 5000, color: "#f472b6" },
+    { id: "b2", category: "購物", monthlyLimit: 3000, color: "#fbbf24" },
+    { id: "b3", category: "娛樂", monthlyLimit: 1500, color: "#60a5fa" },
+    { id: "b4", category: "交通", monthlyLimit: 2000, color: "#34d399" },
+    { id: "b5", category: "貓咪", monthlyLimit: 2000, color: "#a78bfa" },
+    { id: "b6", category: "學校", monthlyLimit: 3000, color: "#fb923c" },
+  ],
+  plannedExpenses: [
+    { id: "pe1", name: "換機車輪胎", amount: 2500, date: "2025-04-01", priority: "high", saved: 0 },
+    { id: "pe2", name: "生日禮物", amount: 1200, date: "2025-03-25", priority: "medium", saved: 0 },
+    { id: "pe3", name: "新手機", amount: 28000, date: "2025-07-01", priority: "low", saved: 5000 },
+  ],
+  incomeHistory: [
+    { id: "i1", month: "2025-01", amount: 48000, note: "一月薪水" },
+    { id: "i2", month: "2025-02", amount: 52000, note: "二月薪水 含加班費" },
+    { id: "i3", month: "2025-03", amount: 52000, note: "三月薪水（預估）", estimated: true },
+  ],
+  categories: {
+    "餐飲": { icon: "🍜", subs: ["早餐", "午餐", "晚餐", "宵夜", "飲料", "聚餐"] },
+    "購物": { icon: "🛍️", subs: ["衣物", "日用品", "3C", "其他"] },
+    "交通": { icon: "🚗", subs: ["機車", "大眾運輸", "計程車", "停車"] },
+    "娛樂": { icon: "🎮", subs: ["電影", "遊戲", "旅遊", "其他"] },
+    "貓咪": { icon: "🐱", subs: ["飼料", "醫療", "玩具", "其他"] },
+    "學校": { icon: "📚", subs: ["課程費", "書籍", "文具", "均攤費用"] },
+    "醫療": { icon: "💊", subs: ["掛號", "藥品", "健檢"] },
+    "居家": { icon: "🏠", subs: ["房租", "水電", "維修"] },
+    "收入": { icon: "💰", subs: ["薪資", "兼職", "獎金", "其他"] },
+  },
+  settings: {
+    currency: "NT$",
+    mainAccountId: "acc1",
+    savingsGoal: 100000,
+  }
+};
+
+// ============================================================
+// UTILS
+// ============================================================
+const fmt = (n) => {
+  const abs = Math.abs(n);
+  const s = abs >= 10000 ? (abs / 10000).toFixed(1) + "萬" : abs.toLocaleString();
+  return (n < 0 ? "-" : "") + "NT$" + s;
+};
+const fmtFull = (n) => (n < 0 ? "-NT$" : "NT$") + Math.abs(n).toLocaleString();
+const today = () => new Date().toISOString().split("T")[0];
+const currentMonth = () => new Date().toISOString().slice(0, 7);
+
+function useLocalStorage(key, initial) {
+  const [val, setVal] = useState(() => {
+    try {
+      const stored = localStorage.getItem(key);
+      return stored ? JSON.parse(stored) : initial;
+    } catch { return initial; }
+  });
+  const set = useCallback((v) => {
+    setVal(v);
+    try { localStorage.setItem(key, JSON.stringify(v)); } catch {}
+  }, [key]);
+  return [val, set];
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function Modal({ title, onClose, children }) {
+  return (
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <h3 style={{ fontSize: 16, fontWeight: 700 }}>{title}</h3>
+          <button className="btn-ghost btn-sm" onClick={onClose}>✕</button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// SIDEBAR NAV
+// ============================================================
+const navItems = [
+  { id: "dashboard", icon: "◈", label: "總覽" },
+  { id: "transactions", icon: "⟳", label: "記帳" },
+  { id: "budget", icon: "◎", label: "預算" },
+  { id: "cards", icon: "▣", label: "信用卡" },
+  { id: "subscriptions", icon: "⊛", label: "訂閱" },
+  { id: "debts", icon: "⇌", label: "代墊/借貸" },
+  { id: "planned", icon: "◷", label: "計劃支出" },
+  { id: "income", icon: "↑", label: "收入管理" },
+  { id: "accounts", icon: "◉", label: "帳戶" },
+  { id: "export", icon: "↗", label: "匯出/串接" },
+];
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function Dashboard({ data }) {
+  const { accounts, creditCards, transactions, budgets, debtRecords, plannedExpenses, incomeHistory, subscriptions } = data;
+  
+  const totalAssets = accounts.reduce((s, a) => s + a.balance, 0);
+  const totalDebt = creditCards.reduce((s, c) => s + (c.paid ? 0 : c.currentBill), 0);
+  const netWorth = totalAssets - totalDebt;
+  
+  const thisMonth = currentMonth();
+  const monthTxns = transactions.filter(t => t.date.startsWith(thisMonth));
+  const monthExpense = monthTxns.filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
+  const monthIncome = monthTxns.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0);
+  
+  const owedToMe = debtRecords.filter(d => d.type === "owed_to_me" && !d.settled).reduce((s, d) => s + d.amount, 0);
+  const iOwe = debtRecords.filter(d => d.type === "i_owe" && !d.settled).reduce((s, d) => s + d.amount, 0);
+  
+  const totalSubs = subscriptions.filter(s => s.active).reduce((sum, s) => {
+    const myShare = s.shared ? s.amount - s.sharedWith.reduce((a, p) => a + p.amount, 0) : s.amount;
+    return sum + myShare;
+  }, 0);
+
+  const upcomingPlanned = plannedExpenses.filter(p => p.date >= today()).sort((a,b) => a.date.localeCompare(b.date)).slice(0, 3);
+  
+  const lastIncome = incomeHistory[incomeHistory.length - 1];
+  
+  const budgetStatus = budgets.map(b => {
+    const spent = monthTxns.filter(t => t.category === b.category && t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
+    return { ...b, spent, pct: Math.min((spent / b.monthlyLimit) * 100, 100) };
+  });
+
+  return (
+    <div style={{ padding: "24px", overflowY: "auto", height: "100%" }} className="scrollbar-thin">
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ fontSize: 12, color: "var(--text3)", marginBottom: 4, letterSpacing: 2 }}>FINANCE DASHBOARD</div>
+        <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: -1 }}>財務總覽</h1>
+      </div>
+
+      {/* Top Stats */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
+        {[
+          { label: "淨資產", value: netWorth, color: netWorth >= 0 ? "var(--green)" : "var(--red)", sub: `資產 ${fmt(totalAssets)}` },
+          { label: "本月支出", value: -monthExpense, color: "var(--red)", sub: `收入 ${fmt(monthIncome)}` },
+          { label: "別人欠我", value: owedToMe, color: "var(--yellow)", sub: `我欠別人 ${fmt(iOwe)}` },
+          { label: "月訂閱費", value: -totalSubs, color: "var(--accent)", sub: `${subscriptions.filter(s=>s.active).length} 項訂閱` },
+        ].map((s, i) => (
+          <div key={i} className="card" style={{ position: "relative", overflow: "hidden" }}>
+            <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 8, letterSpacing: 1 }}>{s.label.toUpperCase()}</div>
+            <div className="mono" style={{ fontSize: 20, fontWeight: 500, color: s.color }}>{fmt(s.value)}</div>
+            <div style={{ fontSize: 11, color: "var(--text3)", marginTop: 4 }}>{s.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
+        {/* Accounts */}
+        <div className="card">
+          <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 14, color: "var(--text2)", letterSpacing: 1 }}>帳戶餘額</div>
+          {accounts.map(a => (
+            <div key={a.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid var(--border)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: a.color }} />
+                <span style={{ fontSize: 13 }}>{a.name}</span>
+                <span className="tag badge-blue" style={{ fontSize: 10 }}>{a.type === "main" ? "主" : a.type === "cash" ? "現金" : "副"}</span>
+              </div>
+              <span className="mono" style={{ fontSize: 14, color: "var(--green)" }}>{fmtFull(a.balance)}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Credit Cards Due */}
+        <div className="card">
+          <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 14, color: "var(--text2)", letterSpacing: 1 }}>信用卡待繳</div>
+          {creditCards.map(c => (
+            <div key={c.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid var(--border)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ width: 8, height: 8, borderRadius: 2, background: c.color }} />
+                <div>
+                  <div style={{ fontSize: 13 }}>{c.name}</div>
+                  <div style={{ fontSize: 11, color: "var(--text3)" }}>繳費日 {c.dueDay}號</div>
+                </div>
+              </div>
+              <div style={{ textAlign: "right" }}>
+                <div className="mono" style={{ fontSize: 14, color: c.paid ? "var(--green)" : "var(--red)" }}>{fmtFull(c.currentBill)}</div>
+                <span className={`tag ${c.paid ? "badge-green" : "badge-red"}`} style={{ fontSize: 10 }}>{c.paid ? "已繳" : "未繳"}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: 20, marginBottom: 20 }}>
+        {/* Budget Status */}
+        <div className="card">
+          <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 14, color: "var(--text2)", letterSpacing: 1 }}>本月預算進度</div>
+          {budgetStatus.map(b => (
+            <div key={b.id} style={{ marginBottom: 12 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                <span style={{ fontSize: 12 }}>{data.categories[b.category]?.icon} {b.category}</span>
+                <span className="mono" style={{ fontSize: 12, color: b.pct >= 100 ? "var(--red)" : b.pct >= 75 ? "var(--yellow)" : "var(--text2)" }}>
+                  {fmtFull(b.spent)} / {fmtFull(b.monthlyLimit)}
+                </span>
+              </div>
+              <div style={{ background: "var(--bg3)", borderRadius: 4, height: 6, overflow: "hidden" }}>
+                <div style={{ width: `${b.pct}%`, height: "100%", background: b.pct >= 100 ? "var(--red)" : b.pct >= 75 ? "var(--yellow)" : b.color, borderRadius: 4, transition: "width 0.5s" }} />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Upcoming */}
+        <div className="card">
+          <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 14, color: "var(--text2)", letterSpacing: 1 }}>即將來臨</div>
+          {upcomingPlanned.map(p => (
+            <div key={p.id} style={{ padding: "10px 0", borderBottom: "1px solid var(--border)" }}>
+              <div style={{ fontSize: 13, marginBottom: 2 }}>{p.name}</div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 11, color: "var(--text3)" }}>{p.date}</span>
+                <span className="mono" style={{ fontSize: 13, color: "var(--yellow)" }}>{fmtFull(p.amount)}</span>
+              </div>
+              <div style={{ background: "var(--bg3)", borderRadius: 4, height: 4, marginTop: 6 }}>
+                <div style={{ width: `${Math.min((p.saved / p.amount) * 100, 100)}%`, height: "100%", background: "var(--accent)", borderRadius: 4 }} />
+              </div>
+            </div>
+          ))}
+          <div style={{ marginTop: 14, padding: "10px", background: "var(--bg3)", borderRadius: 8 }}>
+            <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 4 }}>上月薪資</div>
+            <div className="mono" style={{ fontSize: 16, color: "var(--green)" }}>{fmtFull(lastIncome?.amount || 0)}</div>
+            {lastIncome?.estimated && <span className="tag badge-yellow" style={{ fontSize: 10, marginTop: 4 }}>預估</span>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// TRANSACTIONS
+// ============================================================
+function Transactions({ data, setData }) {
+  const [showAdd, setShowAdd] = useState(false);
+  const [filter, setFilter] = useState({ month: currentMonth(), category: "" });
+  const [form, setForm] = useState({
+    date: today(), amount: "", type: "expense", category: "餐飲", subcategory: "",
+    note: "", accountId: "acc3", cardId: "", splitGroup: ""
+  });
+
+  const filtered = data.transactions
+    .filter(t => t.date.startsWith(filter.month) && (!filter.category || t.category === filter.category))
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  const addTx = () => {
+    if (!form.amount) return;
+    const amt = parseFloat(form.amount) * (form.type === "expense" ? -1 : 1);
+    const tx = { ...form, id: "t" + Date.now(), amount: amt };
+    setData(d => ({ ...d, transactions: [tx, ...d.transactions] }));
+    setShowAdd(false);
+    setForm({ date: today(), amount: "", type: "expense", category: "餐飲", subcategory: "", note: "", accountId: "acc3", cardId: "", splitGroup: "" });
+  };
+
+  const deleteTx = (id) => setData(d => ({ ...d, transactions: d.transactions.filter(t => t.id !== id) }));
+
+  const monthTotal = filtered.reduce((s, t) => s + t.amount, 0);
+
+  return (
+    <div style={{ padding: 24, height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20 }}>
+        <div>
+          <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>TRANSACTIONS</div>
+          <h1 style={{ fontSize: 22, fontWeight: 800 }}>記帳明細</h1>
+        </div>
+        <button className="btn-primary" onClick={() => setShowAdd(true)}>+ 新增</button>
+      </div>
+
+      <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
+        <input type="month" value={filter.month} onChange={e => setFilter(f => ({ ...f, month: e.target.value }))} style={{ width: 150 }} />
+        <select value={filter.category} onChange={e => setFilter(f => ({ ...f, category: e.target.value }))} style={{ width: 130 }}>
+          <option value="">全部分類</option>
+          {Object.keys(data.categories).map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <div className="mono" style={{ marginLeft: "auto", fontSize: 14, color: monthTotal >= 0 ? "var(--green)" : "var(--red)", alignSelf: "center" }}>
+          本月合計: {fmtFull(monthTotal)}
+        </div>
+      </div>
+
+      <div style={{ overflowY: "auto", flex: 1 }} className="scrollbar-thin">
+        {filtered.map(t => {
+          const cat = data.categories[t.category];
+          const card = t.cardId ? data.creditCards.find(c => c.id === t.cardId) : null;
+          return (
+            <div key={t.id} style={{ display: "flex", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--border)", gap: 12 }}>
+              <div style={{ fontSize: 22, width: 36, textAlign: "center" }}>{cat?.icon || "💳"}</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                  <span style={{ fontSize: 14, fontWeight: 600 }}>{t.note || t.category}</span>
+                  <span className="tag badge-purple" style={{ fontSize: 10 }}>{t.category}</span>
+                  {t.subcategory && <span className="tag badge-blue" style={{ fontSize: 10 }}>{t.subcategory}</span>}
+                  {t.splitGroup && <span className="tag badge-yellow" style={{ fontSize: 10 }}>均攤</span>}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text3)" }}>
+                  {t.date}
+                  {card && <span style={{ marginLeft: 8, color: card.color }}>● {card.name}</span>}
+                  {t.accountId && !card && <span style={{ marginLeft: 8 }}>· {data.accounts.find(a => a.id === t.accountId)?.name}</span>}
+                </div>
+              </div>
+              <div className="mono" style={{ fontSize: 16, color: t.amount < 0 ? "var(--red)" : "var(--green)", fontWeight: 500 }}>
+                {t.amount > 0 ? "+" : ""}{fmtFull(t.amount)}
+              </div>
+              <button className="btn-danger btn-sm" onClick={() => deleteTx(t.id)}>✕</button>
+            </div>
+          );
+        })}
+      </div>
+
+      {showAdd && (
+        <Modal title="新增記帳" onClose={() => setShowAdd(false)}>
+          <div className="grid-2">
+            <div className="form-group">
+              <label>日期</label>
+              <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
+            </div>
+            <div className="form-group">
+              <label>類型</label>
+              <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
+                <option value="expense">支出</option>
+                <option value="income">收入</option>
+              </select>
+            </div>
+          </div>
+          <div className="form-group">
+            <label>金額 (NT$)</label>
+            <input type="number" placeholder="0" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
+          </div>
+          <div className="grid-2">
+            <div className="form-group">
+              <label>分類</label>
+              <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value, subcategory: "" }))}>
+                {Object.keys(data.categories).map(c => <option key={c} value={c}>{data.categories[c].icon} {c}</option>)}
+              </select>
+            </div>
+            <div className="form-group">
+              <label>子分類</label>
+              <select value={form.subcategory} onChange={e => setForm(f => ({ ...f, subcategory: e.target.value }))}>
+                <option value="">不選</option>
+                {(data.categories[form.category]?.subs || []).map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="form-group">
+            <label>備註</label>
+            <input placeholder="備註說明..." value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} />
+          </div>
+          <div className="grid-2">
+            <div className="form-group">
+              <label>付款帳戶</label>
+              <select value={form.accountId} onChange={e => setForm(f => ({ ...f, accountId: e.target.value, cardId: "" }))}>
+                <option value="">— 使用信用卡 —</option>
+                {data.accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+              </select>
+            </div>
+            <div className="form-group">
+              <label>信用卡</label>
+              <select value={form.cardId} onChange={e => setForm(f => ({ ...f, cardId: e.target.value, accountId: "" }))}>
+                <option value="">— 現金/帳戶 —</option>
+                {data.creditCards.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="form-group">
+            <label>均攤群組 (選填，填群組代號如 trip2025)</label>
+            <input placeholder="空白=不均攤" value={form.splitGroup} onChange={e => setForm(f => ({ ...f, splitGroup: e.target.value }))} />
+          </div>
+          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 8 }}>
+            <button className="btn-ghost" onClick={() => setShowAdd(false)}>取消</button>
+            <button className="btn-primary" onClick={addTx}>新增</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ============================================================
+// BUDGET
+// ============================================================
+function Budget({ data, setData }) {
+  const [showAdd, setShowAdd] = useState(false);
+  const [form, setForm] = useState({ category: "餐飲", monthlyLimit: "", color: "#7c6af0" });
+
+  const thisMonth = currentMonth();
+  const monthTxns = data.transactions.filter(t => t.date.startsWith(thisMonth));
+
+  const budgetStatus = data.budgets.map(b => {
+    const spent = monthTxns.filter(t => t.category === b.category && t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
+    const remaining = b.monthlyLimit - spent;
+    const pct = Math.min((spent / b.monthlyLimit) * 100, 100);
+    return { ...b, spent, remaining, pct };
+  });
+
+  const totalBudget = data.budgets.reduce((s, b) => s + b.monthlyLimit, 0);
+  const totalSpent = budgetStatus.reduce((s, b) => s + b.spent, 0);
+
+  const addBudget = () => {
+    if (!form.monthlyLimit) return;
+    setData(d => ({ ...d, budgets: [...d.budgets, { ...form, id: "b" + Date.now(), monthlyLimit: parseFloat(form.monthlyLimit) }] }));
+    setShowAdd(false);
+  };
+
+  const deleteBudget = (id) => setData(d => ({ ...d, budgets: d.budgets.filter(b => b.id !== id) }));
+
+  return (
+    <div style={{ padding: 24, overflowY: "auto", height: "100%" }} className="scrollbar-thin">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20 }}>
+        <div>
+          <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>BUDGET TRACKER</div>
+          <h1 style={{ fontSize: 22, fontWeight: 800 }}>預算管理</h1>
+        </div>
+        <button className="btn-primary" onClick={() => setShowAdd(true)}>+ 新增預算</button>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 24 }}>
+        <div className="card">
+          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>月總預算</div>
+          <div className="mono" style={{ fontSize: 22, color: "var(--blue)" }}>{fmtFull(totalBudget)}</div>
+        </div>
+        <div className="card">
+          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>已花費</div>
+          <div className="mono" style={{ fontSize: 22, color: "var(--red)" }}>{fmtFull(totalSpent)}</div>
+        </div>
+        <div className="card">
+          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>剩餘</div>
+          <div className="mono" style={{ fontSize: 22, color: totalBudget - totalSpent >= 0 ? "var(--green)" : "var(--red)" }}>{fmtFull(totalBudget - totalSpent)}</div>
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        {budgetStatus.map(b => (
+          <div key={b.id} className="card" style={{ borderLeft: `3px solid ${b.color}` }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 20 }}>{data.categories[b.category]?.icon}</span>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700 }}>{b.category}</div>
+                  <div style={{ fontSize: 11, color: "var(--text3)" }}>月上限 {fmtFull(b.monthlyLimit)}</div>
+                </div>
+              </div>
+              <button className="btn-danger btn-sm" onClick={() => deleteBudget(b.id)}>✕</button>
+            </div>
+            <div style={{ background: "var(--bg3)", borderRadius: 6, height: 10, overflow: "hidden", marginBottom: 8 }}>
+              <div style={{ width: `${b.pct}%`, height: "100%", background: b.pct >= 100 ? "var(--red)" : b.pct >= 80 ? "var(--yellow)" : b.color, borderRadius: 6, transition: "width 0.5s" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span className="mono" style={{ fontSize: 12, color: "var(--red)" }}>已花 {fmtFull(b.spent)}</span>
+              <span className="mono" style={{ fontSize: 12, color: b.remaining >= 0 ? "var(--green)" : "var(--red)" }}>剩 {fmtFull(b.remaining)}</span>
+            </div>
+            {b.pct >= 100 && <div style={{ marginTop: 8, padding: "4px 8px", background: "rgba(248,113,113,0.1)", borderRadius: 6, fontSize: 11, color: "var(--red)" }}>⚠️ 已超出預算 {fmtFull(Math.abs(b.remaining))}</div>}
+            {b.pct >= 80 && b.pct < 100 && <div style={{ marginTop: 8, padding: "4px 8px", background: "rgba(251,191,36,0.1)", borderRadius: 6, fontSize: 11, color: "var(--yellow)" }}>⚠️ 接近上限，剩 {fmtFull(b.remaining)}</div>}
+          </div>
+        ))}
+      </div>
+
+      {showAdd && (
+        <Modal title="新增預算分類" onClose={() => setShowAdd(false)}>
+          <div className="form-group">
+            <label>分類</label>
+            <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
+              {Object.keys(data.categories).filter(c => !data.budgets.find(b => b.category === c)).map(c => (
+                <option key={c} value={c}>{data.categories[c].icon} {c}</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group">
+            <label>每月上限 (NT$)</label>
+            <input type="number" placeholder="0" value={form.monthlyLimit} onChange={e => setForm(f => ({ ...f, monthlyLimit: e.target.value }))} />
+          </div>
+          <div className="form-group">
+            <label>顏色</label>
+            <input type="color" value={form.color} onChange={e => setForm(f => ({ ...f, color: e.target.value }))} style={{ height: 40, padding: 4 }} />
+          </div>
+          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+            <button className="btn-ghost" onClick={() => setShowAdd(false)}>取消</button>
+            <button className="btn-primary" onClick={addBudget}>新增</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ============================================================
+// CREDIT CARDS
+// ============================================================
+function CreditCards({ data, setData }) {
+  const [showAdd, setShowAdd] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [form, setForm] = useState({ name: "", color: "#7c6af0", billingDay: 25, dueDay: 15, currentBill: 0, paid: false });
+
+  const togglePaid = (id) => setData(d => ({ ...d, creditCards: d.creditCards.map(c => c.id === id ? { ...c, paid: !c.paid } : c) }));
+  const deleteCard = (id) => setData(d => ({ ...d, creditCards: d.creditCards.filter(c => c.id !== id) }));
+  const saveCard = () => {
+    if (!form.name) return;
+    if (editId) {
+      setData(d => ({ ...d, creditCards: d.creditCards.map(c => c.id === editId ? { ...form, id: editId } : c) }));
+    } else {
+      setData(d => ({ ...d, creditCards: [...d.creditCards, { ...form, id: "cc" + Date.now() }] }));
+    }
+    setShowAdd(false); setEditId(null);
+    setForm({ name: "", color: "#7c6af0", billingDay: 25, dueDay: 15, currentBill: 0, paid: false });
+  };
+
+  const openEdit = (c) => { setForm(c); setEditId(c.id); setShowAdd(true); };
+
+  return (
+    <div style={{ padding: 24, overflowY: "auto", height: "100%" }} className="scrollbar-thin">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20 }}>
+        <div>
+          <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>CREDIT CARDS</div>
+          <h1 style={{ fontSize: 22, fontWeight: 800 }}>信用卡管理</h1>
+        </div>
+        <button className="btn-primary" onClick={() => setShowAdd(true)}>+ 新增卡片</button>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+        {data.creditCards.map(c => {
+          const cardTxns = data.transactions.filter(t => t.cardId === c.id && t.date.startsWith(currentMonth()));
+          const cardSubs = data.subscriptions.filter(s => s.cardId === c.id && s.active);
+          return (
+            <div key={c.id} className="card" style={{ background: `linear-gradient(135deg, ${c.color}22, var(--card))`, borderColor: c.color + "44" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+                <div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: c.color }}>{c.name}</div>
+                  <div style={{ fontSize: 11, color: "var(--text3)", marginTop: 2 }}>結帳日 {c.billingDay}號 | 繳費日 {c.dueDay}號</div>
+                </div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button className="btn-ghost btn-sm" onClick={() => openEdit(c)}>✏️</button>
+                  <button className="btn-danger btn-sm" onClick={() => deleteCard(c.id)}>✕</button>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 16 }}>
+                <div>
+                  <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 4 }}>本期帳單</div>
+                  <div className="mono" style={{ fontSize: 24, color: c.paid ? "var(--green)" : "var(--red)", fontWeight: 500 }}>{fmtFull(c.currentBill)}</div>
+                </div>
+                <button
+                  className={c.paid ? "btn-ghost" : "btn-primary"}
+                  onClick={() => togglePaid(c.id)}
+                  style={{ fontSize: 12 }}
+                >
+                  {c.paid ? "✓ 已繳費" : "標記已繳"}
+                </button>
+              </div>
+
+              <div style={{ background: "var(--bg3)", borderRadius: 8, padding: 12 }}>
+                <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 8 }}>本月刷卡明細 ({cardTxns.length} 筆)</div>
+                {cardTxns.slice(0, 3).map(t => (
+                  <div key={t.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
+                    <span>{t.note || t.category}</span>
+                    <span className="mono" style={{ color: "var(--red)" }}>{fmtFull(Math.abs(t.amount))}</span>
+                  </div>
+                ))}
+                {cardSubs.length > 0 && (
+                  <div style={{ borderTop: "1px solid var(--border)", marginTop: 8, paddingTop: 8 }}>
+                    <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 4 }}>定期扣款</div>
+                    {cardSubs.map(s => (
+                      <div key={s.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 3 }}>
+                        <span style={{ color: "var(--accent)" }}>⊛ {s.name}</span>
+                        <span className="mono" style={{ color: "var(--accent)" }}>{fmtFull(s.amount)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {showAdd && (
+        <Modal title={editId ? "編輯信用卡" : "新增信用卡"} onClose={() => { setShowAdd(false); setEditId(null); }}>
+          <div className="form-group">
+            <label>卡片名稱</label>
+            <input placeholder="玉山 Pi 卡" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+          </div>
+          <div className="grid-2">
+            <div className="form-group">
+              <label>結帳日</label>
+              <input type="number" min="1" max="31" value={form.billingDay} onChange={e => setForm(f => ({ ...f, billingDay: parseInt(e.target.value) }))} />
+            </div>
+            <div className="form-group">
+              <label>繳費截止日</label>
+              <input type="number" min="1" max="31" value={form.dueDay} onChange={e => setForm(f => ({ ...f, dueDay: parseInt(e.target.value) }))} />
+            </div>
+          </div>
+          <div className="grid-2">
+            <div className="form-group">
+              <label>本期帳單 (NT$)</label>
+              <input type="number" value={form.currentBill} onChange={e => setForm(f => ({ ...f, currentBill: parseFloat(e.target.value) }))} />
+            </div>
+            <div className="form-group">
+              <label>卡片顏色</label>
+              <input type="color" value={form.color} onChange={e => setForm(f => ({ ...f, color: e.target.value }))} style={{ height: 40, padding: 4 }} />
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+            <button className="btn-ghost" onClick={() => { setShowAdd(false); setEditId(null); }}>取消</button>
+            <button className="btn-primary" onClick={saveCard}>{editId ? "儲存" : "新增"}</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ============================================================
+// SUBSCRIPTIONS
+// ============================================================
+function Subscriptions({ data, setData }) {
+  const [showAdd, setShowAdd] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [form, setForm] = useState({ name: "", amount: "", cycle: "monthly", day: 1, cardId: "", category: "娛樂", shared: false, sharedWith: [], active: true });
+
+  const totalMyShare = data.subscriptions.filter(s => s.active).reduce((sum, s) => {
+    const myShare = s.shared ? s.amount - s.sharedWith.reduce((a, p) => a + p.amount, 0) : s.amount;
+    return sum + myShare;
+  }, 0);
+
+  const totalAnnual = data.subscriptions.filter(s => s.active).reduce((sum, s) => {
+    const myShare = s.shared ? s.amount - s.sharedWith.reduce((a, p) => a + p.amount, 0) : s.amount;
+    return sum + myShare * (s.cycle === "monthly" ? 12 : s.cycle === "yearly" ? 1 : 52);
+  }, 0);
+
+  const saveSubscription = () => {
+    if (!form.name || !form.amount) return;
+    const sub = { ...form, amount: parseFloat(form.amount) };
+    if (editId) {
+      setData(d => ({ ...d, subscriptions: d.subscriptions.map(s => s.id === editId ? { ...sub, id: editId } : s) }));
+    } else {
+      setData(d => ({ ...d, subscriptions: [...d.subscriptions, { ...sub, id: "sub" + Date.now() }] }));
+    }
+    setShowAdd(false); setEditId(null);
+    setForm({ name: "", amount: "", cycle: "monthly", day: 1, cardId: "", category: "娛樂", shared: false, sharedWith: [], active: true });
+  };
+
+  const toggleActive = (id) => setData(d => ({ ...d, subscriptions: d.subscriptions.map(s => s.id === id ? { ...s, active: !s.active } : s) }));
+  const deleteSub = (id) => setData(d => ({ ...d, subscriptions: d.subscriptions.filter(s => s.id !== id) }));
+  const openEdit = (s) => { setForm(s); setEditId(s.id); setShowAdd(true); };
+
+  const addSharedPerson = () => setForm(f => ({ ...f, sharedWith: [...f.sharedWith, { name: "", amount: 0 }] }));
+
+  return (
+    <div style={{ padding: 24, overflowY: "auto", height: "100%" }} className="scrollbar-thin">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20 }}>
+        <div>
+          <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>SUBSCRIPTIONS</div>
+          <h1 style={{ fontSize: 22, fontWeight: 800 }}>訂閱管理</h1>
+        </div>
+        <button className="btn-primary" onClick={() => setShowAdd(true)}>+ 新增訂閱</button>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
+        <div className="card">
+          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>每月我的負擔</div>
+          <div className="mono" style={{ fontSize: 20, color: "var(--accent)" }}>{fmtFull(totalMyShare)}</div>
+        </div>
+        <div className="card">
+          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>預估年花費</div>
+          <div className="mono" style={{ fontSize: 20, color: "var(--red)" }}>{fmtFull(totalAnnual)}</div>
+        </div>
+        <div className="card">
+          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>啟用訂閱數</div>
+          <div className="mono" style={{ fontSize: 20, color: "var(--yellow)" }}>{data.subscriptions.filter(s => s.active).length} 項</div>
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        {data.subscriptions.map(s => {
+          const card = data.creditCards.find(c => c.id === s.cardId);
+          const myShare = s.shared ? s.amount - s.sharedWith.reduce((a, p) => a + p.amount, 0) : s.amount;
+          return (
+            <div key={s.id} className="card" style={{ opacity: s.active ? 1 : 0.5 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700 }}>{s.name}</div>
+                  <div style={{ fontSize: 11, color: "var(--text3)" }}>每{s.cycle === "monthly" ? "月" : s.cycle === "yearly" ? "年" : "週"} {s.day}號扣</div>
+                </div>
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <button className="btn-ghost btn-sm" onClick={() => openEdit(s)}>✏️</button>
+                  <button className="btn-ghost btn-sm" onClick={() => toggleActive(s.id)}>{s.active ? "暫停" : "啟用"}</button>
+                  <button className="btn-danger btn-sm" onClick={() => deleteSub(s.id)}>✕</button>
+                </div>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div className="mono" style={{ fontSize: 18, color: "var(--accent)" }}>{fmtFull(s.amount)}</div>
+                  {s.shared && <div style={{ fontSize: 11, color: "var(--green)" }}>我的份 {fmtFull(myShare)}</div>}
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  {card && <div style={{ fontSize: 11, color: card.color }}>● {card.name}</div>}
+                  <span className="tag badge-purple" style={{ fontSize: 10 }}>{s.category}</span>
+                  {s.shared && <span className="tag badge-yellow" style={{ fontSize: 10, marginLeft: 4 }}>分帳</span>}
+                </div>
+              </div>
+              {s.shared && s.sharedWith.length > 0 && (
+                <div style={{ marginTop: 8, padding: "6px 10px", background: "var(--bg3)", borderRadius: 6 }}>
+                  <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 4 }}>分帳對象</div>
+                  {s.sharedWith.map((p, i) => (
+                    <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+                      <span>{p.name}</span>
+                      <span className="mono" style={{ color: "var(--green)" }}>負擔 {fmtFull(p.amount)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {showAdd && (
+        <Modal title={editId ? "編輯訂閱" : "新增訂閱"} onClose={() => { setShowAdd(false); setEditId(null); }}>
+          <div className="form-group">
+            <label>服務名稱</label>
+            <input placeholder="Netflix" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+          </div>
+          <div className="grid-3">
+            <div className="form-group">
+              <label>金額</label>
+              <input type="number" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
+            </div>
+            <div className="form-group">
+              <label>週期</label>
+              <select value={form.cycle} onChange={e => setForm(f => ({ ...f, cycle: e.target.value }))}>
+                <option value="monthly">每月</option>
+                <option value="yearly">每年</option>
+                <option value="weekly">每週</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label>扣款日</label>
+              <input type="number" min="1" max="31" value={form.day} onChange={e => setForm(f => ({ ...f, day: parseInt(e.target.value) }))} />
+            </div>
+          </div>
+          <div className="grid-2">
+            <div className="form-group">
+              <label>扣款信用卡</label>
+              <select value={form.cardId} onChange={e => setForm(f => ({ ...f, cardId: e.target.value }))}>
+                <option value="">不指定</option>
+                {data.creditCards.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            <div className="form-group">
+              <label>分類</label>
+              <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
+                {Object.keys(data.categories).map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+            <input type="checkbox" id="shared" checked={form.shared} onChange={e => setForm(f => ({ ...f, shared: e.target.checked }))} style={{ width: "auto" }} />
+            <label htmlFor="shared" style={{ margin: 0, cursor: "pointer" }}>與他人分帳</label>
+          </div>
+          {form.shared && (
+            <div style={{ background: "var(--bg3)", borderRadius: 8, padding: 12, marginBottom: 12 }}>
+              <div style={{ fontSize: 12, color: "var(--text2)", marginBottom: 8 }}>分帳對象</div>
+              {form.sharedWith.map((p, i) => (
+                <div key={i} className="grid-2" style={{ marginBottom: 8 }}>
+                  <input placeholder="對方名字" value={p.name} onChange={e => setForm(f => ({ ...f, sharedWith: f.sharedWith.map((x, j) => j === i ? { ...x, name: e.target.value } : x) }))} />
+                  <input type="number" placeholder="對方負擔金額" value={p.amount} onChange={e => setForm(f => ({ ...f, sharedWith: f.sharedWith.map((x, j) => j === i ? { ...x, amount: parseFloat(e.target.value) || 0 } : x) }))} />
+                </div>
+              ))}
+              <button className="btn-ghost btn-sm" onClick={addSharedPerson}>+ 新增分帳對象</button>
+            </div>
+          )}
+          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+            <button className="btn-ghost" onClick={() => { setShowAdd(false); setEditId(null); }}>取消</button>
+            <button className="btn-primary" onClick={saveSubscription}>{editId ? "儲存" : "新增"}</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ============================================================
+// DEBTS
+// ============================================================
+function Debts({ data, setData }) {
+  const [showAdd, setShowAdd] = useState(false);
+  const [form, setForm] = useState({ type: "owed_to_me", person: "", amount: "", date: today(), note: "", settled: false });
+
+  const owedToMe = data.debtRecords.filter(d => d.type === "owed_to_me" && !d.settled);
+  const iOwe = data.debtRecords.filter(d => d.type === "i_owe" && !d.settled);
+  const settled = data.debtRecords.filter(d => d.settled);
+
+  const toggleSettle = (id) => setData(d => ({ ...d, debtRecords: d.debtRecords.map(r => r.id === id ? { ...r, settled: !r.settled } : r) }));
+  const deleteRecord = (id) => setData(d => ({ ...d, debtRecords: d.debtRecords.filter(r => r.id !== id) }));
+  const addRecord = () => {
+    if (!form.person || !form.amount) return;
+    setData(d => ({ ...d, debtRecords: [...d.debtRecords, { ...form, id: "d" + Date.now(), amount: parseFloat(form.amount) }] }));
+    setShowAdd(false);
+    setForm({ type: "owed_to_me", person: "", amount: "", date: today(), note: "", settled: false });
+  };
+
+  const DebtCard = ({ record }) => (
+    <div style={{ display: "flex", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--border)", gap: 12 }}>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 3 }}>{record.person}</div>
+        <div style={{ fontSize: 11, color: "var(--text3)" }}>{record.date} · {record.note}</div>
+      </div>
+      <div className="mono" style={{ fontSize: 16, color: record.type === "owed_to_me" ? "var(--green)" : "var(--red)" }}>
+        {record.type === "owed_to_me" ? "+" : "-"}{fmtFull(record.amount)}
+      </div>
+      <button className="btn-ghost btn-sm" onClick={() => toggleSettle(record.id)}>✓ 結清</button>
+      <button className="btn-danger btn-sm" onClick={() => deleteRecord(record.id)}>✕</button>
+    </div>
+  );
+
+  return (
+    <div style={{ padding: 24, overflowY: "auto", height: "100%" }} className="scrollbar-thin">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20 }}>
+        <div>
+          <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>DEBT TRACKER</div>
+          <h1 style={{ fontSize: 22, fontWeight: 800 }}>代墊 / 借貸</h1>
+        </div>
+        <button className="btn-primary" onClick={() => setShowAdd(true)}>+ 新增</button>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
+        <div className="card" style={{ borderLeft: "3px solid var(--green)" }}>
+          <div style={{ fontSize: 12, color: "var(--text3)", marginBottom: 8 }}>別人欠我（未結清）</div>
+          <div className="mono" style={{ fontSize: 24, color: "var(--green)" }}>{fmtFull(owedToMe.reduce((s, d) => s + d.amount, 0))}</div>
+          {owedToMe.map(d => <DebtCard key={d.id} record={d} />)}
+          {owedToMe.length === 0 && <div style={{ fontSize: 12, color: "var(--text3)", marginTop: 8 }}>無未結清紀錄</div>}
+        </div>
+        <div className="card" style={{ borderLeft: "3px solid var(--red)" }}>
+          <div style={{ fontSize: 12, color: "var(--text3)", marginBottom: 8 }}>我欠別人（未結清）</div>
+          <div className="mono" style={{ fontSize: 24, color: "var(--red)" }}>{fmtFull(iOwe.reduce((s, d) => s + d.amount, 0))}</div>
+          {iOwe.map(d => <DebtCard key={d.id} record={d} />)}
+          {iOwe.length === 0 && <div style={{ fontSize: 12, color: "var(--text3)", marginTop: 8 }}>沒有欠人家錢 🎉</div>}
+        </div>
+      </div>
+
+      {settled.length > 0 && (
+        <div className="card">
+          <div style={{ fontSize: 12, color: "var(--text3)", marginBottom: 12 }}>已結清紀錄</div>
+          {settled.map(d => (
+            <div key={d.id} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--border)", opacity: 0.5, fontSize: 13 }}>
+              <span>{d.person} · {d.note}</span>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <span className="mono" style={{ color: d.type === "owed_to_me" ? "var(--green)" : "var(--red)" }}>{fmtFull(d.amount)}</span>
+                <span className="tag badge-green">✓</span>
+                <button className="btn-danger btn-sm" onClick={() => deleteRecord(d.id)}>✕</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {showAdd && (
+        <Modal title="新增代墊/借貸" onClose={() => setShowAdd(false)}>
+          <div className="form-group">
+            <label>類型</label>
+            <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
+              <option value="owed_to_me">別人欠我（我代墊）</option>
+              <option value="i_owe">我欠別人</option>
+            </select>
+          </div>
+          <div className="grid-2">
+            <div className="form-group">
+              <label>對象</label>
+              <input placeholder="小明" value={form.person} onChange={e => setForm(f => ({ ...f, person: e.target.value }))} />
+            </div>
+            <div className="form-group">
+              <label>金額</label>
+              <input type="number" placeholder="0" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
+            </div>
+          </div>
+          <div className="form-group">
+            <label>日期</label>
+            <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
+          </div>
+          <div className="form-group">
+            <label>備註</label>
+            <input placeholder="聚餐代墊..." value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} />
+          </div>
+          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+            <button className="btn-ghost" onClick={() => setShowAdd(false)}>取消</button>
+            <button className="btn-primary" onClick={addRecord}>新增</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ============================================================
+// PLANNED EXPENSES
+// ============================================================
+function PlannedExpenses({ data, setData }) {
+  const [showAdd, setShowAdd] = useState(false);
+  const [form, setForm] = useState({ name: "", amount: "", date: "", priority: "medium", saved: 0 });
+
+  const totalNeeded = data.plannedExpenses.reduce((s, p) => s + p.amount - p.saved, 0);
+  const totalSaved = data.plannedExpenses.reduce((s, p) => s + p.saved, 0);
+
+  const addExpense = () => {
+    if (!form.name || !form.amount) return;
+    setData(d => ({ ...d, plannedExpenses: [...d.plannedExpenses, { ...form, id: "pe" + Date.now(), amount: parseFloat(form.amount), saved: parseFloat(form.saved) || 0 }] }));
+    setShowAdd(false);
+    setForm({ name: "", amount: "", date: "", priority: "medium", saved: 0 });
+  };
+
+  const updateSaved = (id, saved) => setData(d => ({ ...d, plannedExpenses: d.plannedExpenses.map(p => p.id === id ? { ...p, saved: parseFloat(saved) || 0 } : p) }));
+  const deleteExpense = (id) => setData(d => ({ ...d, plannedExpenses: d.plannedExpenses.filter(p => p.id !== id) }));
+
+  const priorityColor = { high: "var(--red)", medium: "var(--yellow)", low: "var(--blue)" };
+  const priorityLabel = { high: "緊急", medium: "一般", low: "計劃" };
+
+  const mainAccount = data.accounts.find(a => a.id === data.settings.mainAccountId);
+  const availableAfterPlanned = (mainAccount?.balance || 0) - totalNeeded;
+
+  return (
+    <div style={{ padding: 24, overflowY: "auto", height: "100%" }} className="scrollbar-thin">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20 }}>
+        <div>
+          <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>PLANNED EXPENSES</div>
+          <h1 style={{ fontSize: 22, fontWeight: 800 }}>計劃支出</h1>
+        </div>
+        <button className="btn-primary" onClick={() => setShowAdd(true)}>+ 新增計劃</button>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 24 }}>
+        <div className="card">
+          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>還需存</div>
+          <div className="mono" style={{ fontSize: 20, color: "var(--red)" }}>{fmtFull(totalNeeded)}</div>
+        </div>
+        <div className="card">
+          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>已存備用</div>
+          <div className="mono" style={{ fontSize: 20, color: "var(--green)" }}>{fmtFull(totalSaved)}</div>
+        </div>
+        <div className="card" style={{ borderColor: availableAfterPlanned < 0 ? "var(--red)" : "var(--border)" }}>
+          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>扣除計劃後餘額</div>
+          <div className="mono" style={{ fontSize: 20, color: availableAfterPlanned >= 0 ? "var(--green)" : "var(--red)" }}>{fmtFull(availableAfterPlanned)}</div>
+          {availableAfterPlanned < 0 && <div style={{ fontSize: 11, color: "var(--red)", marginTop: 4 }}>⚠️ 餘額不足！</div>}
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        {data.plannedExpenses.sort((a, b) => a.date.localeCompare(b.date)).map(p => {
+          const pct = Math.min((p.saved / p.amount) * 100, 100);
+          const remaining = p.amount - p.saved;
+          const daysLeft = Math.ceil((new Date(p.date) - new Date()) / (1000 * 60 * 60 * 24));
+          return (
+            <div key={p.id} className="card">
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700 }}>{p.name}</div>
+                  <div style={{ fontSize: 11, color: "var(--text3)" }}>{p.date} · {daysLeft > 0 ? `還有 ${daysLeft} 天` : "已到期"}</div>
+                </div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <span className="tag" style={{ background: priorityColor[p.priority] + "22", color: priorityColor[p.priority], border: `1px solid ${priorityColor[p.priority]}44`, fontSize: 10 }}>{priorityLabel[p.priority]}</span>
+                  <button className="btn-danger btn-sm" onClick={() => deleteExpense(p.id)}>✕</button>
+                </div>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                <span style={{ fontSize: 12, color: "var(--text3)" }}>目標: {fmtFull(p.amount)}</span>
+                <span className="mono" style={{ fontSize: 12, color: "var(--green)" }}>已存: {fmtFull(p.saved)}</span>
+              </div>
+              <div style={{ background: "var(--bg3)", borderRadius: 6, height: 8, overflow: "hidden", marginBottom: 10 }}>
+                <div style={{ width: `${pct}%`, height: "100%", background: pct >= 100 ? "var(--green)" : "var(--accent)", borderRadius: 6 }} />
+              </div>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <span style={{ fontSize: 12, color: "var(--text3)" }}>已存金額:</span>
+                <input type="number" value={p.saved} onChange={e => updateSaved(p.id, e.target.value)} style={{ flex: 1, padding: "4px 8px", fontSize: 12 }} />
+              </div>
+              {remaining > 0 && <div style={{ marginTop: 8, fontSize: 12, color: "var(--yellow)" }}>還差 {fmtFull(remaining)}</div>}
+            </div>
+          );
+        })}
+      </div>
+
+      {showAdd && (
+        <Modal title="新增計劃支出" onClose={() => setShowAdd(false)}>
+          <div className="form-group">
+            <label>名稱</label>
+            <input placeholder="換手機..." value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+          </div>
+          <div className="grid-2">
+            <div className="form-group">
+              <label>目標金額</label>
+              <input type="number" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
+            </div>
+            <div className="form-group">
+              <label>已存入</label>
+              <input type="number" value={form.saved} onChange={e => setForm(f => ({ ...f, saved: e.target.value }))} />
+            </div>
+          </div>
+          <div className="grid-2">
+            <div className="form-group">
+              <label>預計日期</label>
+              <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
+            </div>
+            <div className="form-group">
+              <label>優先級</label>
+              <select value={form.priority} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))}>
+                <option value="high">緊急</option>
+                <option value="medium">一般</option>
+                <option value="low">計劃</option>
+              </select>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+            <button className="btn-ghost" onClick={() => setShowAdd(false)}>取消</button>
+            <button className="btn-primary" onClick={addExpense}>新增</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ============================================================
+// INCOME
+// ============================================================
+function Income({ data, setData }) {
+  const [showAdd, setShowAdd] = useState(false);
+  const [form, setForm] = useState({ month: currentMonth(), amount: "", note: "", estimated: false });
+
+  const addIncome = () => {
+    if (!form.amount) return;
+    const existing = data.incomeHistory.findIndex(i => i.month === form.month);
+    const record = { ...form, id: "i" + Date.now(), amount: parseFloat(form.amount) };
+    if (existing >= 0) {
+      setData(d => ({ ...d, incomeHistory: d.incomeHistory.map((i, idx) => idx === existing ? record : i) }));
+    } else {
+      setData(d => ({ ...d, incomeHistory: [...d.incomeHistory, record].sort((a, b) => a.month.localeCompare(b.month)) }));
+    }
+    setShowAdd(false);
+    setForm({ month: currentMonth(), amount: "", note: "", estimated: false });
+  };
+
+  const sorted = [...data.incomeHistory].sort((a, b) => b.month.localeCompare(a.month));
+  const avg = data.incomeHistory.filter(i => !i.estimated).reduce((s, i, _, arr) => s + i.amount / arr.length, 0);
+
+  return (
+    <div style={{ padding: 24, overflowY: "auto", height: "100%" }} className="scrollbar-thin">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20 }}>
+        <div>
+          <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>INCOME TRACKER</div>
+          <h1 style={{ fontSize: 22, fontWeight: 800 }}>收入管理</h1>
+        </div>
+        <button className="btn-primary" onClick={() => setShowAdd(true)}>+ 記錄收入</button>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 24 }}>
+        <div className="card">
+          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>平均月收（實際）</div>
+          <div className="mono" style={{ fontSize: 20, color: "var(--green)" }}>{fmtFull(Math.round(avg))}</div>
+        </div>
+        <div className="card">
+          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>最近一個月</div>
+          <div className="mono" style={{ fontSize: 20, color: sorted[0]?.estimated ? "var(--yellow)" : "var(--green)" }}>
+            {fmtFull(sorted[0]?.amount || 0)}
+          </div>
+          {sorted[0]?.estimated && <span className="tag badge-yellow" style={{ fontSize: 10 }}>預估</span>}
+        </div>
+        <div className="card">
+          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>累積紀錄</div>
+          <div className="mono" style={{ fontSize: 20, color: "var(--blue)" }}>{data.incomeHistory.length} 個月</div>
+        </div>
+      </div>
+
+      <div className="card">
+        <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 16, color: "var(--text2)" }}>月收入歷史</div>
+        <div style={{ display: "flex", gap: 4, alignItems: "flex-end", height: 120, marginBottom: 16 }}>
+          {sorted.slice(0, 12).reverse().map((i, idx) => {
+            const maxAmt = Math.max(...data.incomeHistory.map(x => x.amount));
+            const h = (i.amount / maxAmt) * 100;
+            return (
+              <div key={i.id} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                <div style={{ fontSize: 9, color: "var(--text3)", textAlign: "center" }} className="mono">{fmtFull(i.amount).replace("NT$", "")}</div>
+                <div style={{ width: "100%", height: `${h}%`, background: i.estimated ? "var(--yellow)" : "var(--green)", borderRadius: "3px 3px 0 0", minHeight: 4, opacity: 0.8 }} />
+                <div style={{ fontSize: 9, color: "var(--text3)" }}>{i.month.slice(5)}</div>
+              </div>
+            );
+          })}
+        </div>
+
+        {sorted.map(i => (
+          <div key={i.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: "1px solid var(--border)" }}>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 600 }}>{i.month}</div>
+              <div style={{ fontSize: 11, color: "var(--text3)" }}>{i.note}</div>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              {i.estimated && <span className="tag badge-yellow">預估</span>}
+              <span className="mono" style={{ fontSize: 16, color: "var(--green)" }}>{fmtFull(i.amount)}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {showAdd && (
+        <Modal title="記錄收入" onClose={() => setShowAdd(false)}>
+          <div className="form-group">
+            <label>月份</label>
+            <input type="month" value={form.month} onChange={e => setForm(f => ({ ...f, month: e.target.value }))} />
+          </div>
+          <div className="form-group">
+            <label>金額 (NT$)</label>
+            <input type="number" placeholder="50000" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
+          </div>
+          <div className="form-group">
+            <label>備註</label>
+            <input placeholder="薪水 + 加班費..." value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} />
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+            <input type="checkbox" id="est" checked={form.estimated} onChange={e => setForm(f => ({ ...f, estimated: e.target.checked }))} style={{ width: "auto" }} />
+            <label htmlFor="est" style={{ margin: 0, cursor: "pointer" }}>這是預估值（尚未確定）</label>
+          </div>
+          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+            <button className="btn-ghost" onClick={() => setShowAdd(false)}>取消</button>
+            <button className="btn-primary" onClick={addIncome}>儲存</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ============================================================
+// ACCOUNTS
+// ============================================================
+function Accounts({ data, setData }) {
+  const [showAdd, setShowAdd] = useState(false);
+  const [form, setForm] = useState({ name: "", type: "sub", balance: "", color: "#60a5fa" });
+
+  const addAccount = () => {
+    if (!form.name) return;
+    setData(d => ({ ...d, accounts: [...d.accounts, { ...form, id: "acc" + Date.now(), balance: parseFloat(form.balance) || 0 }] }));
+    setShowAdd(false);
+    setForm({ name: "", type: "sub", balance: "", color: "#60a5fa" });
+  };
+
+  const deleteAccount = (id) => setData(d => ({ ...d, accounts: d.accounts.filter(a => a.id !== id) }));
+  const updateBalance = (id, bal) => setData(d => ({ ...d, accounts: d.accounts.map(a => a.id === id ? { ...a, balance: parseFloat(bal) || 0 } : a) }));
+
+  const total = data.accounts.reduce((s, a) => s + a.balance, 0);
+
+  return (
+    <div style={{ padding: 24, overflowY: "auto", height: "100%" }} className="scrollbar-thin">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20 }}>
+        <div>
+          <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>ACCOUNTS</div>
+          <h1 style={{ fontSize: 22, fontWeight: 800 }}>帳戶管理</h1>
+        </div>
+        <button className="btn-primary" onClick={() => setShowAdd(true)}>+ 新增帳戶</button>
+      </div>
+
+      <div className="card" style={{ marginBottom: 20, background: "linear-gradient(135deg, var(--accent)22, var(--card))" }}>
+        <div style={{ fontSize: 12, color: "var(--text3)", marginBottom: 8 }}>所有帳戶總計</div>
+        <div className="mono" style={{ fontSize: 32, color: "var(--green)", fontWeight: 500 }}>{fmtFull(total)}</div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        {data.accounts.map(a => (
+          <div key={a.id} className="card" style={{ borderLeft: `4px solid ${a.color}` }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700 }}>{a.name}</div>
+                <span className="tag badge-blue" style={{ fontSize: 10, marginTop: 4 }}>
+                  {a.type === "main" ? "主帳戶" : a.type === "cash" ? "現金" : "副帳戶"}
+                </span>
+              </div>
+              {a.id !== data.settings.mainAccountId && (
+                <button className="btn-danger btn-sm" onClick={() => deleteAccount(a.id)}>✕</button>
+              )}
+            </div>
+            <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>餘額</div>
+            <input
+              type="number"
+              value={a.balance}
+              onChange={e => updateBalance(a.id, e.target.value)}
+              className="mono"
+              style={{ fontSize: 18, background: "var(--bg3)" }}
+            />
+          </div>
+        ))}
+      </div>
+
+      {showAdd && (
+        <Modal title="新增帳戶" onClose={() => setShowAdd(false)}>
+          <div className="form-group">
+            <label>帳戶名稱</label>
+            <input placeholder="富邦銀行" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+          </div>
+          <div className="grid-2">
+            <div className="form-group">
+              <label>類型</label>
+              <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
+                <option value="main">主帳戶</option>
+                <option value="sub">副帳戶</option>
+                <option value="cash">現金</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label>初始餘額</label>
+              <input type="number" placeholder="0" value={form.balance} onChange={e => setForm(f => ({ ...f, balance: e.target.value }))} />
+            </div>
+          </div>
+          <div className="form-group">
+            <label>顏色</label>
+            <input type="color" value={form.color} onChange={e => setForm(f => ({ ...f, color: e.target.value }))} style={{ height: 40, padding: 4 }} />
+          </div>
+          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+            <button className="btn-ghost" onClick={() => setShowAdd(false)}>取消</button>
+            <button className="btn-primary" onClick={addAccount}>新增</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ============================================================
+// GOOGLE SHEETS SYNC HOOK
+// ============================================================
+function useSheetsSync() {
+  const [webAppUrl, setWebAppUrlState] = useState(() => localStorage.getItem("sheetsWebAppUrl") || "");
+  const [syncLog, setSyncLog] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("syncLog") || "[]"); } catch { return []; }
+  });
+  const [syncing, setSyncing] = useState(false);
+
+  const setWebAppUrl = (url) => {
+    setWebAppUrlState(url);
+    localStorage.setItem("sheetsWebAppUrl", url);
+  };
+
+  const addLog = (entry) => {
+    setSyncLog(prev => {
+      const updated = [entry, ...prev].slice(0, 50);
+      localStorage.setItem("syncLog", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  // 送單筆資料到 Sheets
+  const pushRow = useCallback(async (sheetName, row) => {
+    const url = localStorage.getItem("sheetsWebAppUrl");
+    if (!url) return;
+    try {
+      await fetch(url, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "appendRow", sheet: sheetName, row }),
+      });
+      addLog({ time: new Date().toLocaleTimeString(), sheet: sheetName, status: "✓", msg: `新增一筆到「${sheetName}」` });
+    } catch (e) {
+      addLog({ time: new Date().toLocaleTimeString(), sheet: sheetName, status: "✗", msg: `失敗: ${e.message}` });
+    }
+  }, []);
+
+  // 全量同步（覆寫整個 sheet）
+  const pushFullSync = useCallback(async (data) => {
+    const url = localStorage.getItem("sheetsWebAppUrl");
+    if (!url) { alert("請先設定 Web App URL！"); return; }
+    setSyncing(true);
+    try {
+      // 記帳
+      const txRows = data.transactions.map(t => {
+        const acc = t.accountId ? data.accounts.find(a => a.id === t.accountId)?.name : "";
+        const card = t.cardId ? data.creditCards.find(c => c.id === t.cardId)?.name : "";
+        return [t.date, t.amount, t.type === "income" ? "收入" : "支出", t.category, t.subcategory || "", t.note || "", acc || "", card || "", t.splitGroup || ""];
+      });
+      // 訂閱
+      const subRows = data.subscriptions.map(s => {
+        const card = data.creditCards.find(c => c.id === s.cardId)?.name || "";
+        const myShare = s.shared ? s.amount - s.sharedWith.reduce((a, p) => a + p.amount, 0) : s.amount;
+        return [s.name, s.amount, s.cycle, s.day, card, s.category, s.shared ? "是" : "否", myShare, s.active ? "啟用" : "暫停"];
+      });
+      // 借貸
+      const debtRows = data.debtRecords.map(d => [
+        d.type === "owed_to_me" ? "別人欠我" : "我欠別人", d.person, d.amount, d.date, d.note || "", d.settled ? "已結清" : "未結清"
+      ]);
+
+      const payload = {
+        action: "fullSync",
+        sheets: {
+          "記帳明細": { headers: ["日期","金額","類型","分類","子分類","備註","帳戶","信用卡","均攤群組"], rows: txRows },
+          "訂閱管理": { headers: ["名稱","金額","週期","扣款日","信用卡","分類","分帳","我的份額","狀態"], rows: subRows },
+          "借貸紀錄": { headers: ["類型","對象","金額","日期","備註","狀態"], rows: debtRows },
+        }
+      };
+
+      await fetch(url, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      addLog({ time: new Date().toLocaleTimeString(), sheet: "全部", status: "✓", msg: `全量同步完成（${txRows.length} 筆記帳, ${subRows.length} 筆訂閱, ${debtRows.length} 筆借貸）` });
+    } catch (e) {
+      addLog({ time: new Date().toLocaleTimeString(), sheet: "全部", status: "✗", msg: `同步失敗: ${e.message}` });
+    }
+    setSyncing(false);
+  }, []);
+
+  return { webAppUrl, setWebAppUrl, pushRow, pushFullSync, syncing, syncLog };
+}
+
+// ============================================================
+// EXPORT / INTEGRATION
+// ============================================================
+function Export({ data, sync }) {
+  const [copied, setCopied] = useState("");
+  const [urlInput, setUrlInput] = useState(sync.webAppUrl);
+
+  const generateCSV = (type) => {
+    let rows = [];
+    let filename = "";
+    if (type === "transactions") {
+      rows = [["日期","金額","類型","分類","子分類","備註","帳戶","信用卡","均攤群組"]];
+      data.transactions.forEach(t => {
+        const acc = t.accountId ? data.accounts.find(a => a.id === t.accountId)?.name : "";
+        const card = t.cardId ? data.creditCards.find(c => c.id === t.cardId)?.name : "";
+        rows.push([t.date, t.amount, t.type === "income" ? "收入" : "支出", t.category, t.subcategory, t.note, acc, card, t.splitGroup || ""]);
+      });
+      filename = "transactions.csv";
+    } else if (type === "subscriptions") {
+      rows = [["名稱","金額","週期","扣款日","信用卡","分類","分帳","我的份額"]];
+      data.subscriptions.forEach(s => {
+        const card = data.creditCards.find(c => c.id === s.cardId)?.name || "";
+        const myShare = s.shared ? s.amount - s.sharedWith.reduce((a, p) => a + p.amount, 0) : s.amount;
+        rows.push([s.name, s.amount, s.cycle, s.day, card, s.category, s.shared ? "是" : "否", myShare]);
+      });
+      filename = "subscriptions.csv";
+    } else if (type === "debts") {
+      rows = [["類型","對象","金額","日期","備註","已結清"]];
+      data.debtRecords.forEach(d => {
+        rows.push([d.type === "owed_to_me" ? "別人欠我" : "我欠別人", d.person, d.amount, d.date, d.note, d.settled ? "是" : "否"]);
+      });
+      filename = "debts.csv";
+    }
+    const csv = rows.map(r => r.map(c => `"${c}"`).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = filename; a.click();
+  };
+
+  const gsScript = `const SPREADSHEET_ID = "貼上你的試算表ID";
+
+function doPost(e) {
+  try {
+    const payload = JSON.parse(e.postData.contents);
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+
+    if (payload.action === "appendRow") {
+      let sheet = ss.getSheetByName(payload.sheet);
+      if (!sheet) sheet = ss.insertSheet(payload.sheet);
+      sheet.appendRow(payload.row);
+    }
+
+    if (payload.action === "fullSync") {
+      Object.entries(payload.sheets).forEach(([sheetName, data]) => {
+        let sheet = ss.getSheetByName(sheetName);
+        if (!sheet) sheet = ss.insertSheet(sheetName);
+        sheet.clearContents();
+        sheet.appendRow(data.headers);
+        if (data.rows.length > 0) {
+          sheet.getRange(2, 1, data.rows.length, data.headers.length)
+               .setValues(data.rows);
+        }
+        // 凍結標題列、自動調整欄寬
+        sheet.setFrozenRows(1);
+        sheet.autoResizeColumns(1, data.headers.length);
+      });
+    }
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: "ok" }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: "error", message: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// 允許 CORS（GET 用來測試連線）
+function doGet(e) {
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: "ok", message: "Finance Tracker Script Ready" }))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+
+  const copyText = (text, key) => {
+    const el = document.createElement("textarea");
+    el.value = text;
+    el.style.cssText = "position:fixed;top:0;left:0;opacity:0;pointer-events:none";
+    document.body.appendChild(el);
+    el.focus();
+    el.select();
+    try {
+      document.execCommand("copy");
+      setCopied(key);
+      setTimeout(() => setCopied(""), 2000);
+    } catch(e) {
+      navigator.clipboard?.writeText(text).then(() => {
+        setCopied(key);
+        setTimeout(() => setCopied(""), 2000);
+      });
+    }
+    document.body.removeChild(el);
+  };
+
+  const saveUrl = () => {
+    sync.setWebAppUrl(urlInput.trim());
+    alert("✓ URL 已儲存！");
+  };
+
+  return (
+    <div style={{ padding: 24, overflowY: "auto", height: "100%" }} className="scrollbar-thin">
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>EXPORT & SYNC</div>
+        <h1 style={{ fontSize: 22, fontWeight: 800 }}>匯出 / 串接</h1>
+      </div>
+
+      {/* Google Sheets 串接設定 */}
+      <div className="card" style={{ marginBottom: 20, borderColor: sync.webAppUrl ? "var(--green)" : "var(--border)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <div style={{ fontSize: 14, fontWeight: 700 }}>📊 Google Sheets 自動串接</div>
+          <span className={`tag ${sync.webAppUrl ? "badge-green" : "badge-red"}`}>
+            {sync.webAppUrl ? "✓ 已設定" : "未設定"}
+          </span>
+        </div>
+
+        {/* Step 1 */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "var(--accent)", marginBottom: 8 }}>步驟 1 — 複製 Apps Script 代碼</div>
+          <div style={{ fontSize: 12, color: "var(--text2)", marginBottom: 10, lineHeight: 1.7 }}>
+            前往 <a href="https://script.google.com" target="_blank" style={{ color: "var(--accent)" }}>script.google.com</a> → 新增專案 → 把以下代碼貼進去（記得填入你的試算表 ID）
+          </div>
+          <div style={{ position: "relative" }}>
+            <pre style={{ background: "var(--bg3)", borderRadius: 8, padding: 16, fontSize: 11, color: "var(--text)", overflowX: "auto", lineHeight: 1.7, maxHeight: 280 }}>
+              {gsScript}
+            </pre>
+            <button className="btn-ghost btn-sm" onClick={() => copyText(gsScript, "gs")}
+              style={{ position: "absolute", top: 8, right: 8, background: "var(--card)" }}>
+              {copied === "gs" ? "✓ 已複製" : "📋 複製"}
+            </button>
+          </div>
+        </div>
+
+        {/* Step 2 */}
+        <div style={{ marginBottom: 20, padding: 14, background: "var(--bg3)", borderRadius: 10 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "var(--accent)", marginBottom: 10 }}>步驟 2 — 部署為 Web App</div>
+          {[
+            "點右上角「部署」→「新增部署作業」",
+            "類型選「網頁應用程式」",
+            "執行身分：選「我」",
+            "誰可以存取：選「所有人」",
+            "點「部署」，複製產生的 Web App URL",
+          ].map((s, i) => (
+            <div key={i} style={{ display: "flex", gap: 10, marginBottom: 6, fontSize: 13 }}>
+              <span style={{ width: 20, height: 20, background: "var(--accent)", color: "white", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{i+1}</span>
+              <span style={{ color: "var(--text)" }}>{s}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Step 3 */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "var(--accent)", marginBottom: 8 }}>步驟 3 — 貼上 URL 並儲存</div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input
+              placeholder="https://script.google.com/macros/s/.../exec"
+              value={urlInput}
+              onChange={e => setUrlInput(e.target.value)}
+              style={{ fontFamily: "monospace", fontSize: 12 }}
+            />
+            <button className="btn-primary" style={{ whiteSpace: "nowrap" }} onClick={saveUrl}>儲存</button>
+          </div>
+        </div>
+
+        {/* Sync actions */}
+        {sync.webAppUrl && (
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <button className="btn-primary" onClick={() => sync.pushFullSync(data)} disabled={sync.syncing}
+              style={{ background: "var(--green)", opacity: sync.syncing ? 0.6 : 1 }}>
+              {sync.syncing ? "⏳ 同步中..." : "🔄 立即全量同步"}
+            </button>
+            <div style={{ fontSize: 12, color: "var(--text2)", alignSelf: "center" }}>
+              之後每次新增記帳、訂閱、借貸都會自動推送
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Sync Log */}
+      {sync.syncLog.length > 0 && (
+        <div className="card" style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>📋 同步紀錄</div>
+          <div style={{ maxHeight: 200, overflowY: "auto" }} className="scrollbar-thin">
+            {sync.syncLog.map((log, i) => (
+              <div key={i} style={{ display: "flex", gap: 10, padding: "6px 0", borderBottom: "1px solid var(--border)", fontSize: 12 }}>
+                <span style={{ color: "var(--text3)", width: 70, flexShrink: 0 }}>{log.time}</span>
+                <span style={{ color: log.status === "✓" ? "var(--green)" : "var(--red)", width: 16 }}>{log.status}</span>
+                <span style={{ color: "var(--text2)" }}>{log.msg}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* CSV Export */}
+      <div className="card" style={{ marginBottom: 20 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 16 }}>📥 手動匯出 CSV</div>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <button className="btn-ghost" onClick={() => generateCSV("transactions")}>記帳明細</button>
+          <button className="btn-ghost" onClick={() => generateCSV("subscriptions")}>訂閱清單</button>
+          <button className="btn-ghost" onClick={() => generateCSV("debts")}>借貸紀錄</button>
+        </div>
+      </div>
+
+      {/* JSON Backup */}
+      <div className="card">
+        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>💾 完整資料備份 (JSON)</div>
+        <div style={{ fontSize: 12, color: "var(--text2)", marginBottom: 12 }}>備份所有資料，之後可還原</div>
+        <button className="btn-ghost" onClick={() => {
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a"); a.href = url; a.download = `finance-backup-${today()}.json`; a.click();
+        }}>下載完整備份</button>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// MAIN APP
+// ============================================================
+export default function App() {
+  const [data, setData] = useLocalStorage("financeData", initialData);
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const sync = useSheetsSync();
+
+  // 包裝 setData，新增記帳時自動推送
+  const setDataWithSync = useCallback((updater) => {
+    setData(prev => {
+      const next = typeof updater === "function" ? updater(prev) : updater;
+
+      // 偵測新增的 transaction
+      if (next.transactions.length > prev.transactions.length) {
+        const newTx = next.transactions[0];
+        const acc = newTx.accountId ? next.accounts.find(a => a.id === newTx.accountId)?.name : "";
+        const card = newTx.cardId ? next.creditCards.find(c => c.id === newTx.cardId)?.name : "";
+        sync.pushRow("記帳明細", [
+          newTx.date, newTx.amount, newTx.type === "income" ? "收入" : "支出",
+          newTx.category, newTx.subcategory || "", newTx.note || "",
+          acc || "", card || "", newTx.splitGroup || ""
+        ]);
+      }
+      // 偵測新增的 subscription
+      if (next.subscriptions.length > prev.subscriptions.length) {
+        const s = next.subscriptions[next.subscriptions.length - 1];
+        const card = next.creditCards.find(c => c.id === s.cardId)?.name || "";
+        const myShare = s.shared ? s.amount - s.sharedWith.reduce((a, p) => a + p.amount, 0) : s.amount;
+        sync.pushRow("訂閱管理", [s.name, s.amount, s.cycle, s.day, card, s.category, s.shared ? "是" : "否", myShare, "啟用"]);
+      }
+      // 偵測新增的 debt
+      if (next.debtRecords.length > prev.debtRecords.length) {
+        const d = next.debtRecords[next.debtRecords.length - 1];
+        sync.pushRow("借貸紀錄", [
+          d.type === "owed_to_me" ? "別人欠我" : "我欠別人",
+          d.person, d.amount, d.date, d.note || "", "未結清"
+        ]);
+      }
+
+      return next;
+    });
+  }, [setData, sync]);
+
+  const renderPage = () => {
+    switch (activeTab) {
+      case "dashboard": return <Dashboard data={data} />;
+      case "transactions": return <Transactions data={data} setData={setDataWithSync} />;
+      case "budget": return <Budget data={data} setData={setDataWithSync} />;
+      case "cards": return <CreditCards data={data} setData={setDataWithSync} />;
+      case "subscriptions": return <Subscriptions data={data} setData={setDataWithSync} />;
+      case "debts": return <Debts data={data} setData={setDataWithSync} />;
+      case "planned": return <PlannedExpenses data={data} setData={setDataWithSync} />;
+      case "income": return <Income data={data} setData={setDataWithSync} />;
+      case "accounts": return <Accounts data={data} setData={setDataWithSync} />;
+      case "export": return <Export data={data} sync={sync} />;
+      default: return null;
+    }
+  };
+
+  return (
+    <>
+      <GlobalStyle />
+      <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+        {/* Sidebar */}
+        <div style={{ width: 200, background: "var(--bg2)", borderRight: "1px solid var(--border)", display: "flex", flexDirection: "column", flexShrink: 0 }}>
+          <div style={{ padding: "20px 16px 16px", borderBottom: "1px solid var(--border)" }}>
+            <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: -0.5 }}>財務管理</div>
+            <div style={{ fontSize: 10, color: "var(--text3)", marginTop: 2, letterSpacing: 2 }}>FINANCE TRACKER</div>
+          </div>
+          <nav style={{ flex: 1, padding: "12px 8px", overflowY: "auto" }}>
+            {navItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "9px 12px",
+                  marginBottom: 2,
+                  borderRadius: 8,
+                  background: activeTab === item.id ? "var(--accent)" : "transparent",
+                  color: activeTab === item.id ? "white" : "var(--text)",
+                  fontSize: 13,
+                  fontWeight: activeTab === item.id ? 700 : 500,
+                  textAlign: "left",
+                  cursor: "pointer",
+                  border: "none",
+                  transition: "all 0.15s",
+                }}
+                onMouseEnter={e => { if (activeTab !== item.id) e.currentTarget.style.background = "var(--bg3)"; }}
+                onMouseLeave={e => { if (activeTab !== item.id) e.currentTarget.style.background = "transparent"; }}
+              >
+                <span style={{ fontSize: 16, opacity: 0.9 }}>{item.icon}</span>
+                {item.label}
+              </button>
+            ))}
+          </nav>
+          <div style={{ padding: 12, borderTop: "1px solid var(--border)", fontSize: 10, color: "var(--text3)", textAlign: "center" }}>
+            資料儲存於瀏覽器本地
+          </div>
+        </div>
+
+        {/* Main */}
+        <div style={{ flex: 1, overflow: "hidden", background: "var(--bg)" }}>
+          {renderPage()}
+        </div>
+      </div>
+    </>
+  );
+}
