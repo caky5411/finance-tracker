@@ -140,6 +140,83 @@
     .badge-purple { background: rgba(91,79,212,0.1); color: var(--accent); border: 1px solid rgba(91,79,212,0.25); }
     .badge-pink { background: rgba(194,40,106,0.1); color: var(--pink); border: 1px solid rgba(194,40,106,0.25); }
   
+
+    /* ══════════════════════════════════════
+       RWD — Mobile First
+    ══════════════════════════════════════ */
+    @media (max-width: 640px) {
+      /* Bottom nav bar */
+      .sidebar { display: none !important; }
+      .mobile-nav {
+        display: flex !important;
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        height: 56px;
+        background: var(--card);
+        border-top: 1px solid var(--border);
+        z-index: 200;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .mobile-nav button {
+        flex: 1;
+        min-width: 56px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        padding: 6px 4px;
+        font-family: 'Syne', sans-serif;
+      }
+      .mobile-nav button .nav-icon { font-size: 18px; }
+      .mobile-nav button .nav-label { font-size: 9px; font-weight: 600; color: var(--text3); }
+      .mobile-nav button.active .nav-label { color: var(--accent); }
+      .mobile-nav button.active .nav-icon { filter: none; }
+      
+      /* Main content padding for bottom nav */
+      .main-content { padding-bottom: 64px !important; }
+      
+      /* Grid: all become single column on mobile */
+      .grid-2, .grid-3 { grid-template-columns: 1fr !important; }
+      
+      /* Modal full screen on mobile */
+      .modal {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 92vh !important;
+        border-radius: 16px 16px 0 0 !important;
+        margin: 0 !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+      }
+      .modal-overlay {
+        align-items: flex-end !important;
+      }
+      
+      /* Cards full width */
+      .card { border-radius: 12px; }
+      
+      /* Stats grid: 2 col on mobile */
+      .stats-grid { grid-template-columns: 1fr 1fr !important; }
+      
+      /* Reduce padding */
+      .page-content { padding: 12px !important; }
+      
+      /* Inline flex → wrap */
+      .flex-nowrap { flex-wrap: wrap !important; }
+      
+      /* Table-like rows stack */
+      .row-desktop { flex-direction: column !important; align-items: flex-start !important; gap: 6px !important; }
+    }
+    
+    /* Hide mobile nav on desktop */
+    .mobile-nav { display: none; }
   </style>
 </head>
 <body>
@@ -390,7 +467,7 @@ function Modal({ title, onClose, children }) {
   return (
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 8 }}>
           <h3 style={{ fontSize: 16, fontWeight: 700 }}>{title}</h3>
           <button className="btn-ghost btn-sm" onClick={onClose}>✕</button>
         </div>
@@ -449,14 +526,14 @@ function Dashboard({ data }) {
   });
 
   return (
-    <div style={{ padding: "24px", overflowY: "auto", height: "100%" }} className="scrollbar-thin">
+    <div className="page-content scrollbar-thin" style={{ padding: "24px", overflowY: "auto", height: "100%" }}>
       <div style={{ marginBottom: 24 }}>
         <div style={{ fontSize: 12, color: "var(--text3)", marginBottom: 4, letterSpacing: 2 }}>FINANCE DASHBOARD</div>
         <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: -1 }}>財務總覽</h1>
       </div>
 
       {/* Top Stats */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
+      <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
         {[
           { label: "淨資產", value: netWorth, color: netWorth >= 0 ? "var(--green)" : "var(--red)", sub: `資產 ${fmt(totalAssets)}` },
           { label: "本月支出", value: -monthExpense, color: "var(--red)", sub: `收入 ${fmt(monthIncome)}` },
@@ -582,8 +659,8 @@ function Transactions({ data, setData }) {
   const monthTotal = filtered.reduce((s, t) => s + t.amount, 0);
 
   return (
-    <div style={{ padding: 24, height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20 }}>
+    <div className="page-content" style={{ padding: 24, height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
         <div>
           <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>TRANSACTIONS</div>
           <h1 style={{ fontSize: 22, fontWeight: 800 }}>記帳明細</h1>
@@ -728,8 +805,8 @@ function Budget({ data, setData }) {
   const deleteBudget = (id) => setData(d => ({ ...d, budgets: d.budgets.filter(b => b.id !== id) }));
 
   return (
-    <div style={{ padding: 24, overflowY: "auto", height: "100%" }} className="scrollbar-thin">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20 }}>
+    <div className="page-content scrollbar-thin" style={{ padding: 24, overflowY: "auto", height: "100%" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
         <div>
           <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>BUDGET TRACKER</div>
           <h1 style={{ fontSize: 22, fontWeight: 800 }}>預算管理</h1>
@@ -737,7 +814,7 @@ function Budget({ data, setData }) {
         <button className="btn-primary" onClick={() => setShowAdd(true)}>+ 新增預算</button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 24 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 24 }}>
         <div className="card">
           <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>月總預算</div>
           <div className="mono" style={{ fontSize: 22, color: "var(--blue)" }}>{fmtFull(totalBudget)}</div>
@@ -830,8 +907,8 @@ function CreditCards({ data, setData }) {
   const openEdit = (c) => { setForm(c); setEditId(c.id); setShowAdd(true); };
 
   return (
-    <div style={{ padding: 24, overflowY: "auto", height: "100%" }} className="scrollbar-thin">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20 }}>
+    <div className="page-content scrollbar-thin" style={{ padding: 24, overflowY: "auto", height: "100%" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
         <div>
           <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>CREDIT CARDS</div>
           <h1 style={{ fontSize: 22, fontWeight: 800 }}>信用卡管理</h1>
@@ -968,8 +1045,8 @@ function Subscriptions({ data, setData }) {
   const addSharedPerson = () => setForm(f => ({ ...f, sharedWith: [...f.sharedWith, { name: "", amount: 0 }] }));
 
   return (
-    <div style={{ padding: 24, overflowY: "auto", height: "100%" }} className="scrollbar-thin">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20 }}>
+    <div className="page-content scrollbar-thin" style={{ padding: 24, overflowY: "auto", height: "100%" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
         <div>
           <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>SUBSCRIPTIONS</div>
           <h1 style={{ fontSize: 22, fontWeight: 800 }}>訂閱管理</h1>
@@ -977,7 +1054,7 @@ function Subscriptions({ data, setData }) {
         <button className="btn-primary" onClick={() => setShowAdd(true)}>+ 新增訂閱</button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
         <div className="card">
           <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>每月我的負擔</div>
           <div className="mono" style={{ fontSize: 20, color: "var(--accent)" }}>{fmtFull(totalMyShare)}</div>
@@ -1136,8 +1213,8 @@ function Debts({ data, setData }) {
   );
 
   return (
-    <div style={{ padding: 24, overflowY: "auto", height: "100%" }} className="scrollbar-thin">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20 }}>
+    <div className="page-content scrollbar-thin" style={{ padding: 24, overflowY: "auto", height: "100%" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
         <div>
           <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>DEBT TRACKER</div>
           <h1 style={{ fontSize: 22, fontWeight: 800 }}>代墊 / 借貸</h1>
@@ -1240,8 +1317,8 @@ function PlannedExpenses({ data, setData }) {
   const availableAfterPlanned = (mainAccount?.balance || 0) - totalNeeded;
 
   return (
-    <div style={{ padding: 24, overflowY: "auto", height: "100%" }} className="scrollbar-thin">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20 }}>
+    <div className="page-content scrollbar-thin" style={{ padding: 24, overflowY: "auto", height: "100%" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
         <div>
           <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>PLANNED EXPENSES</div>
           <h1 style={{ fontSize: 22, fontWeight: 800 }}>計劃支出</h1>
@@ -1249,7 +1326,7 @@ function PlannedExpenses({ data, setData }) {
         <button className="btn-primary" onClick={() => setShowAdd(true)}>+ 新增計劃</button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 24 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 24 }}>
         <div className="card">
           <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>還需存</div>
           <div className="mono" style={{ fontSize: 20, color: "var(--red)" }}>{fmtFull(totalNeeded)}</div>
@@ -1363,8 +1440,8 @@ function Income({ data, setData }) {
   const avg = data.incomeHistory.filter(i => !i.estimated).reduce((s, i, _, arr) => s + i.amount / arr.length, 0);
 
   return (
-    <div style={{ padding: 24, overflowY: "auto", height: "100%" }} className="scrollbar-thin">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20 }}>
+    <div className="page-content scrollbar-thin" style={{ padding: 24, overflowY: "auto", height: "100%" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
         <div>
           <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>INCOME TRACKER</div>
           <h1 style={{ fontSize: 22, fontWeight: 800 }}>收入管理</h1>
@@ -1372,7 +1449,7 @@ function Income({ data, setData }) {
         <button className="btn-primary" onClick={() => setShowAdd(true)}>+ 記錄收入</button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 24 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 24 }}>
         <div className="card">
           <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>平均月收（實際）</div>
           <div className="mono" style={{ fontSize: 20, color: "var(--green)" }}>{fmtFull(Math.round(avg))}</div>
@@ -1468,8 +1545,8 @@ function Accounts({ data, setData }) {
   const total = data.accounts.reduce((s, a) => s + a.balance, 0);
 
   return (
-    <div style={{ padding: 24, overflowY: "auto", height: "100%" }} className="scrollbar-thin">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20 }}>
+    <div className="page-content scrollbar-thin" style={{ padding: 24, overflowY: "auto", height: "100%" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
         <div>
           <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>ACCOUNTS</div>
           <h1 style={{ fontSize: 22, fontWeight: 800 }}>帳戶管理</h1>
@@ -1741,7 +1818,7 @@ function doGet(e) {
   };
 
   return (
-    <div style={{ padding: 24, overflowY: "auto", height: "100%" }} className="scrollbar-thin">
+    <div className="page-content scrollbar-thin" style={{ padding: 24, overflowY: "auto", height: "100%" }}>
       <div style={{ marginBottom: 24 }}>
         <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>EXPORT & SYNC</div>
         <h1 style={{ fontSize: 22, fontWeight: 800 }}>匯出 / 串接</h1>
@@ -1923,7 +2000,7 @@ function App() {
       
       <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
         {/* Sidebar */}
-        <div style={{ width: 200, background: "var(--bg2)", borderRight: "1px solid var(--border)", display: "flex", flexDirection: "column", flexShrink: 0 }}>
+        <div className="sidebar" style={{ width: 200, background: "var(--bg2)", borderRight: "1px solid var(--border)", display: "flex", flexDirection: "column", flexShrink: 0 }}>
           <div style={{ padding: "20px 16px 16px", borderBottom: "1px solid var(--border)" }}>
             <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: -0.5 }}>財務管理</div>
             <div style={{ fontSize: 10, color: "var(--text3)", marginTop: 2, letterSpacing: 2 }}>FINANCE TRACKER</div>
@@ -1964,10 +2041,25 @@ function App() {
         </div>
 
         {/* Main */}
-        <div style={{ flex: 1, overflow: "hidden", background: "var(--bg)" }}>
+        <div className="main-content" style={{ flex: 1, overflow: "hidden", background: "var(--bg)" }}>
           {renderPage()}
         </div>
       </div>
+      
+      {/* Mobile bottom nav */}
+      <nav className="mobile-nav">
+        {navItems.map(item => (
+          <button
+            key={item.id}
+            className={activeTab === item.id ? "active" : ""}
+            onClick={() => setActiveTab(item.id)}
+            style={{ color: activeTab === item.id ? "var(--accent)" : "var(--text3)" }}
+          >
+            <span className="nav-icon">{item.icon}</span>
+            <span className="nav-label">{item.label}</span>
+          </button>
+        ))}
+      </nav>
     </>
   );
 }
