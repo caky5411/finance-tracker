@@ -1,2027 +1,949 @@
 <!DOCTYPE html>
+<!-- 財務管理工具 v2.0 | 2026-03-20 | 純HTML重寫，手機優先 -->
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>財務管理工具</title>
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>財務管理 v2.0</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f6fa;--bg2:#ecedf2;--bg3:#e2e4eb;
+  --card:#fff;--card2:#f7f8fb;
+  --border:#d8dae4;--border2:#c8cad8;
+  --text:#1a1c2e;--text2:#5a5c78;--text3:#9a9cb8;
+  --accent:#5b4fd4;--accent2:#7c6af0;
+  --green:#0a8a68;--green-bg:#e8f7f2;
+  --red:#d03060;--red-bg:#fdf0f4;
+  --amber:#c47a00;--amber-bg:#fdf6e6;
+  --blue:#2060c0;--blue-bg:#eff4ff;
+  --r:12px;
+}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:72px;font-size:15px}
+.mono{font-family:'JetBrains Mono',monospace}
+input,select,textarea{
+  font-family:'Noto Sans TC',sans-serif;font-size:16px;
+  background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);
+  border-radius:10px;padding:12px 14px;width:100%;outline:none;
+  transition:border .15s;-webkit-appearance:none;appearance:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);background:#fff}
+textarea{resize:vertical;min-height:72px}
+button{font-family:'Noto Sans TC',sans-serif;cursor:pointer;border:none;border-radius:10px;font-size:14px;font-weight:600;transition:all .15s;min-height:44px;padding:0 18px}
+.btn{background:var(--card2);color:var(--text2);border:1.5px solid var(--border2)}
+.btn:active{opacity:.75}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:active{background:var(--accent2)}
+.btn-green{background:var(--green-bg);color:var(--green);border:1.5px solid rgba(10,138,104,.25)}
+.btn-red{background:var(--red-bg);color:var(--red);border:1.5px solid rgba(208,48,96,.25)}
+.btn-amber{background:var(--amber-bg);color:var(--amber);border:1.5px solid rgba(196,122,0,.25)}
+.btn-sm{min-height:34px;padding:0 12px;font-size:12px;border-radius:8px}
+.card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:16px}
+label{font-size:13px;color:var(--text2);font-weight:600;display:block;margin-bottom:6px}
+.fg{margin-bottom:16px}
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.tag-green{background:var(--green-bg);color:var(--green)}
+.tag-red{background:var(--red-bg);color:var(--red)}
+.tag-amber{background:var(--amber-bg);color:var(--amber)}
+.tag-blue{background:var(--blue-bg);color:var(--blue)}
+.tag-purple{background:rgba(91,79,212,.1);color:var(--accent)}
+.divider{height:1px;background:var(--border);margin:12px 0}
 
-    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
-    
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    :root {
-      --bg: #f0f2f7;
-      --bg2: #e8ebf2;
-      --bg3: #dde1ea;
-      --card: #ffffff;
-      --card2: #f7f8fc;
-      --border: #d0d5e2;
-      --accent: #5b4fd4;
-      --accent2: #7c6af0;
-      --green: #0f9b6a;
-      --red: #d94040;
-      --yellow: #c47d00;
-      --blue: #2563eb;
-      --pink: #c2286a;
-      --text: #1a1d2e;
-      --text2: #3d4460;
-      --text3: #6b7299;
-    }
-    
-    body { 
-      font-family: 'Syne', sans-serif; 
-      background: var(--bg); 
-      color: var(--text);
-      min-height: 100vh;
-    }
-    
-    .mono { font-family: 'DM Mono', monospace; }
-    
-    input, select, textarea {
-      font-family: 'Syne', sans-serif;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-radius: 8px;
-      padding: 8px 12px;
-      font-size: 13px;
-      outline: none;
-      transition: border-color 0.2s;
-      width: 100%;
-    }
-    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
-    
-    button {
-      font-family: 'Syne', sans-serif;
-      cursor: pointer;
-      border: none;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      transition: all 0.15s;
-    }
-    
-    .btn-primary {
-      background: var(--accent);
-      color: white;
-      padding: 8px 16px;
-    }
-    .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
-    
-    .btn-ghost {
-      background: transparent;
-      color: var(--text2);
-      padding: 8px 16px;
-      border: 1px solid var(--border);
-    }
-    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-    
-    .btn-danger {
-      background: rgba(217,64,64,0.1);
-      color: var(--red);
-      padding: 6px 12px;
-      border: 1px solid rgba(217,64,64,0.3);
-    }
-    .btn-danger:hover { background: rgba(217,64,64,0.2); }
-    
-    .btn-sm { padding: 5px 10px; font-size: 12px; }
-    
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-    }
-    
-    .tag {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-    
-    .scrollbar-thin::-webkit-scrollbar { width: 4px; height: 4px; }
-    .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-    .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-    
-    .modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(4px);
-      z-index: 100;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .modal {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
-      width: 90%;
-      max-width: 520px;
-      max-height: 85vh;
-      overflow-y: auto;
-    }
-    
-    label { font-size: 12px; color: var(--text2); font-weight: 600; display: block; margin-bottom: 4px; }
-    .form-group { margin-bottom: 14px; }
-    
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-    
-    .badge-green { background: rgba(15,155,106,0.12); color: var(--green); border: 1px solid rgba(15,155,106,0.3); }
-    .badge-red { background: rgba(217,64,64,0.1); color: var(--red); border: 1px solid rgba(217,64,64,0.3); }
-    .badge-yellow { background: rgba(196,125,0,0.1); color: var(--yellow); border: 1px solid rgba(196,125,0,0.3); }
-    .badge-blue { background: rgba(37,99,235,0.1); color: var(--blue); border: 1px solid rgba(37,99,235,0.25); }
-    .badge-purple { background: rgba(91,79,212,0.1); color: var(--accent); border: 1px solid rgba(91,79,212,0.25); }
-    .badge-pink { background: rgba(194,40,106,0.1); color: var(--pink); border: 1px solid rgba(194,40,106,0.25); }
-  
+/* Page */
+.page{display:none;padding:16px;max-width:600px;margin:0 auto}
+.page.active{display:block}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:10px;flex-wrap:wrap}
+.page-title{font-size:20px;font-weight:700}
+.page-sub{font-size:12px;color:var(--text3);margin-top:2px}
 
-    /* ══ RWD Mobile ══ */
-    .mobile-nav { display: none; }
-    .stats-grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px; }
-    @media (max-width: 640px) {
-      .sidebar-desktop { display: none !important; }
-      .mobile-nav {
-        display: flex !important;
-        position: fixed; bottom: 0; left: 0; right: 0;
-        height: 58px; background: var(--card);
-        border-top: 1px solid var(--border);
-        z-index: 200; overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-      .mobile-nav button {
-        flex: 1; min-width: 52px;
-        display: flex; flex-direction: column;
-        align-items: center; justify-content: center;
-        gap: 2px; border: none; background: transparent;
-        cursor: pointer; padding: 4px 2px;
-        font-family: 'Syne', sans-serif;
-      }
-      .mobile-nav .mni { font-size: 18px; }
-      .mobile-nav .mnl { font-size: 9px; font-weight: 600; color: var(--text3); }
-      .mobile-nav button.active .mnl { color: var(--accent); }
-      .main-content-area { padding-bottom: 66px !important; }
-      .grid-2, .grid-3 { grid-template-columns: 1fr !important; }
-      .modal { width: 100% !important; max-width: 100% !important; border-radius: 16px 16px 0 0 !important; position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; max-height: 92vh !important; }
-      .modal-overlay { align-items: flex-end !important; }
-      .stats-grid-4 { grid-template-columns: 1fr 1fr !important; }
-      .page-pad { padding: 12px !important; }
-      .flex-header { flex-wrap: wrap !important; gap: 8px !important; }
-    }
-  </style>
+/* Bottom nav */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:62px;background:var(--card);border-top:1.5px solid var(--border);display:flex;z-index:100;box-shadow:0 -2px 16px rgba(0,0,0,.08)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:transparent;border:none;cursor:pointer;padding:6px 4px;min-height:62px;font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
+.nav-btn.active{color:var(--accent)}
+.nav-btn .ni{font-size:20px;line-height:1}
+.nav-btn .nl{font-size:10px;font-weight:600}
+
+/* Modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:none;align-items:flex-end;justify-content:center;padding:0}
+.overlay.open{display:flex}
+.modal{background:var(--card);border-radius:20px 20px 0 0;padding:20px 18px 32px;width:100%;max-height:90vh;overflow-y:auto}
+.modal-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 18px}
+.modal-title{font-size:17px;font-weight:700;margin-bottom:18px}
+.modal-footer{display:flex;gap:10px;margin-top:18px}
+.modal-footer button{flex:1}
+
+/* Toast */
+.toast{position:fixed;bottom:74px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;border-radius:20px;padding:10px 20px;font-size:13px;font-weight:600;z-index:999;pointer-events:none;opacity:0;transition:opacity .25s;white-space:nowrap}
+.toast.show{opacity:1}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:14px}
+.kpi.full{grid-column:1/-1}
+.kpi-label{font-size:11px;color:var(--text3);font-weight:600;margin-bottom:6px}
+.kpi-value{font-size:22px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1.1}
+.kpi-sub{font-size:11px;color:var(--text3);margin-top:4px}
+.kpi.green{border-color:rgba(10,138,104,.3);background:var(--green-bg)}
+.kpi.red{border-color:rgba(208,48,96,.25)}
+.kpi.amber{border-color:rgba(196,122,0,.25)}
+
+/* Transaction rows */
+.tx-list{display:flex;flex-direction:column;gap:6px}
+.tx-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:border .15s}
+.tx-row:active{border-color:var(--accent)}
+.tx-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:var(--bg3)}
+.tx-info{flex:1;min-width:0}
+.tx-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tx-meta{font-size:12px;color:var(--text3);margin-top:2px}
+.tx-amount{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;flex-shrink:0}
+.tx-amount.neg{color:var(--red)}
+.tx-amount.pos{color:var(--green)}
+
+/* Month filter */
+.month-scroll{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;-webkit-overflow-scrolling:touch}
+.month-scroll::-webkit-scrollbar{display:none}
+.month-btn{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;background:var(--bg3);color:var(--text2);border:1.5px solid transparent;cursor:pointer;white-space:nowrap;min-height:36px}
+.month-btn.active{background:var(--accent);color:#fff}
+
+/* Budget bar */
+.budget-item{margin-bottom:14px}
+.budget-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.budget-bar-bg{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden}
+.budget-bar{height:8px;border-radius:4px;background:var(--accent);transition:width .3s}
+.budget-bar.warn{background:var(--amber)}
+.budget-bar.over{background:var(--red)}
+
+/* CC card */
+.cc-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.cc-name{font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.cc-bar-bg{height:6px;background:var(--bg3);border-radius:3px;margin:10px 0 6px}
+.cc-bar{height:6px;border-radius:3px;background:var(--accent);transition:width .3s}
+.cc-bar.warn{background:var(--amber)}
+.cc-bar.over{background:var(--red)}
+
+/* List row */
+.list-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card);border:1.5px solid var(--border);border-radius:10px;margin-bottom:8px}
+.list-info{flex:1;min-width:0}
+.list-name{font-size:14px;font-weight:600}
+.list-meta{font-size:12px;color:var(--text3);margin-top:2px}
+
+/* Section header */
+.sec-hd{font-size:12px;font-weight:700;color:var(--text3);letter-spacing:.5px;margin:18px 0 10px;text-transform:uppercase}
+
+/* Debt */
+.debt-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card);border:1.5px solid var(--border);border-radius:10px;margin-bottom:8px}
+.debt-row.settled{opacity:.45}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="text/babel">
-    const { useState, useEffect, useCallback } = React;
 
+<!-- Pages -->
+<div class="page active" id="page-dashboard"></div>
+<div class="page" id="page-tx"></div>
+<div class="page" id="page-budget"></div>
+<div class="page" id="page-cards"></div>
+<div class="page" id="page-subs"></div>
+<div class="page" id="page-debts"></div>
+<div class="page" id="page-planned"></div>
+<div class="page" id="page-income"></div>
+<div class="page" id="page-accounts"></div>
+<div class="page" id="page-settings"></div>
 
-// ============================================================
-// GLOBAL STYLES
-// ============================================================
-const GlobalStyle = () => (
-  <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
-    
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    :root {
-      --bg: #f0f2f7;
-      --bg2: #e8ebf2;
-      --bg3: #dde1ea;
-      --card: #ffffff;
-      --card2: #f7f8fc;
-      --border: #d0d5e2;
-      --accent: #5b4fd4;
-      --accent2: #7c6af0;
-      --green: #0f9b6a;
-      --red: #d94040;
-      --yellow: #c47d00;
-      --blue: #2563eb;
-      --pink: #c2286a;
-      --text: #1a1d2e;
-      --text2: #3d4460;
-      --text3: #6b7299;
-    }
-    
-    body { 
-      font-family: 'Syne', sans-serif; 
-      background: var(--bg); 
-      color: var(--text);
-      min-height: 100vh;
-    }
-    
-    .mono { font-family: 'DM Mono', monospace; }
-    
-    input, select, textarea {
-      font-family: 'Syne', sans-serif;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-radius: 8px;
-      padding: 8px 12px;
-      font-size: 13px;
-      outline: none;
-      transition: border-color 0.2s;
-      width: 100%;
-    }
-    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
-    
-    button {
-      font-family: 'Syne', sans-serif;
-      cursor: pointer;
-      border: none;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      transition: all 0.15s;
-    }
-    
-    .btn-primary {
-      background: var(--accent);
-      color: white;
-      padding: 8px 16px;
-    }
-    .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
-    
-    .btn-ghost {
-      background: transparent;
-      color: var(--text2);
-      padding: 8px 16px;
-      border: 1px solid var(--border);
-    }
-    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-    
-    .btn-danger {
-      background: rgba(217,64,64,0.1);
-      color: var(--red);
-      padding: 6px 12px;
-      border: 1px solid rgba(217,64,64,0.3);
-    }
-    .btn-danger:hover { background: rgba(217,64,64,0.2); }
-    
-    .btn-sm { padding: 5px 10px; font-size: 12px; }
-    
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-    }
-    
-    .tag {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-    
-    .scrollbar-thin::-webkit-scrollbar { width: 4px; height: 4px; }
-    .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-    .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-    
-    .modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(4px);
-      z-index: 100;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .modal {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
-      width: 90%;
-      max-width: 520px;
-      max-height: 85vh;
-      overflow-y: auto;
-    }
-    
-    label { font-size: 12px; color: var(--text2); font-weight: 600; display: block; margin-bottom: 4px; }
-    .form-group { margin-bottom: 14px; }
-    
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-    
-    .badge-green { background: rgba(15,155,106,0.12); color: var(--green); border: 1px solid rgba(15,155,106,0.3); }
-    .badge-red { background: rgba(217,64,64,0.1); color: var(--red); border: 1px solid rgba(217,64,64,0.3); }
-    .badge-yellow { background: rgba(196,125,0,0.1); color: var(--yellow); border: 1px solid rgba(196,125,0,0.3); }
-    .badge-blue { background: rgba(37,99,235,0.1); color: var(--blue); border: 1px solid rgba(37,99,235,0.25); }
-    .badge-purple { background: rgba(91,79,212,0.1); color: var(--accent); border: 1px solid rgba(91,79,212,0.25); }
-    .badge-pink { background: rgba(194,40,106,0.1); color: var(--pink); border: 1px solid rgba(194,40,106,0.25); }
-  `}</style>
-);
+<!-- Bottom nav -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="goto('dashboard')" id="nb-dashboard"><span class="ni">◈</span><span class="nl">總覽</span></button>
+  <button class="nav-btn" onclick="goto('tx')" id="nb-tx"><span class="ni">⟳</span><span class="nl">記帳</span></button>
+  <button class="nav-btn" onclick="goto('budget')" id="nb-budget"><span class="ni">◎</span><span class="nl">預算</span></button>
+  <button class="nav-btn" onclick="goto('cards')" id="nb-cards"><span class="ni">▣</span><span class="nl">信用卡</span></button>
+  <button class="nav-btn" onclick="goto('more')" id="nb-more"><span class="ni">⋯</span><span class="nl">更多</span></button>
+</nav>
 
-// ============================================================
-// INITIAL DATA
-// ============================================================
-const initialData = {
-  accounts: [
-    { id: "acc1", name: "玉山銀行（主帳戶）", type: "main", balance: 45000, color: "#7c6af0" },
-    { id: "acc2", name: "國泰世華", type: "sub", balance: 12000, color: "#60a5fa" },
-    { id: "acc3", name: "現金", type: "cash", balance: 3500, color: "#34d399" },
-  ],
-  creditCards: [
-    { id: "cc1", name: "玉山 Pi 卡", color: "#f472b6", billingDay: 25, dueDay: 15, currentBill: 8500, paid: false },
-    { id: "cc2", name: "國泰 CUBE", color: "#fbbf24", billingDay: 20, dueDay: 10, currentBill: 3200, paid: true },
-    { id: "cc3", name: "台新 @GoGo", color: "#34d399", billingDay: 15, dueDay: 5, currentBill: 1800, paid: false },
-  ],
-  subscriptions: [
-    { id: "sub1", name: "Netflix", amount: 270, cycle: "monthly", day: 15, cardId: "cc1", category: "娛樂", shared: false, sharedWith: [], active: true },
-    { id: "sub2", name: "YouTube Premium", amount: 179, cycle: "monthly", day: 8, cardId: "cc2", category: "娛樂", shared: true, sharedWith: [{ name: "小明", amount: 90 }], active: true },
-    { id: "sub3", name: "Spotify", amount: 149, cycle: "monthly", day: 1, cardId: "cc1", category: "娛樂", shared: false, sharedWith: [], active: true },
-    { id: "sub4", name: "iCloud 50GB", amount: 30, cycle: "monthly", day: 5, cardId: "cc1", category: "工具", shared: false, sharedWith: [], active: true },
-    { id: "sub5", name: "ChatGPT Plus", amount: 620, cycle: "monthly", day: 20, cardId: "cc2", category: "工具", shared: false, sharedWith: [], active: true },
-  ],
-  transactions: [
-    { id: "t1", date: "2025-03-01", amount: -120, category: "餐飲", subcategory: "午餐", note: "便當", accountId: "acc3", type: "expense", splitGroup: null },
-    { id: "t2", date: "2025-03-02", amount: -680, category: "交通", subcategory: "機車", note: "加油", cardId: "cc1", accountId: null, type: "expense", splitGroup: null },
-    { id: "t3", date: "2025-03-03", amount: 52000, category: "收入", subcategory: "薪資", note: "2月薪水", accountId: "acc1", type: "income", splitGroup: null },
-    { id: "t4", date: "2025-03-05", amount: -320, category: "餐飲", subcategory: "晚餐", note: "聚餐代墊", accountId: "acc3", type: "expense", splitGroup: "g1" },
-    { id: "t5", date: "2025-03-08", amount: -2800, category: "購物", subcategory: "衣物", note: "外套", cardId: "cc1", accountId: null, type: "expense", splitGroup: null },
-    { id: "t6", date: "2025-03-10", amount: -450, category: "貓咪", subcategory: "飼料", note: "皇家飼料", cardId: "cc2", accountId: null, type: "expense", splitGroup: null },
-    { id: "t7", date: "2025-03-10", amount: -1280, category: "學校", subcategory: "課程費", note: "Python課程 均攤", accountId: "acc1", type: "expense", splitGroup: "g2" },
-  ],
-  debtRecords: [
-    { id: "d1", type: "owed_to_me", person: "小明", amount: 1600, date: "2025-03-05", note: "聚餐代墊", settled: false },
-    { id: "d2", type: "i_owe", person: "阿華", amount: 500, date: "2025-02-20", note: "車錢", settled: true },
-    { id: "d3", type: "owed_to_me", person: "同學A", amount: 640, date: "2025-03-10", note: "Python課程均攤", settled: false },
-  ],
-  budgets: [
-    { id: "b1", category: "餐飲", monthlyLimit: 5000, color: "#f472b6" },
-    { id: "b2", category: "購物", monthlyLimit: 3000, color: "#fbbf24" },
-    { id: "b3", category: "娛樂", monthlyLimit: 1500, color: "#60a5fa" },
-    { id: "b4", category: "交通", monthlyLimit: 2000, color: "#34d399" },
-    { id: "b5", category: "貓咪", monthlyLimit: 2000, color: "#a78bfa" },
-    { id: "b6", category: "學校", monthlyLimit: 3000, color: "#fb923c" },
-  ],
-  plannedExpenses: [
-    { id: "pe1", name: "換機車輪胎", amount: 2500, date: "2025-04-01", priority: "high", saved: 0 },
-    { id: "pe2", name: "生日禮物", amount: 1200, date: "2025-03-25", priority: "medium", saved: 0 },
-    { id: "pe3", name: "新手機", amount: 28000, date: "2025-07-01", priority: "low", saved: 5000 },
-  ],
-  incomeHistory: [
-    { id: "i1", month: "2025-01", amount: 48000, note: "一月薪水" },
-    { id: "i2", month: "2025-02", amount: 52000, note: "二月薪水 含加班費" },
-    { id: "i3", month: "2025-03", amount: 52000, note: "三月薪水（預估）", estimated: true },
-  ],
-  categories: {
-    "餐飲": { icon: "🍜", subs: ["早餐", "午餐", "晚餐", "宵夜", "飲料", "聚餐"] },
-    "購物": { icon: "🛍️", subs: ["衣物", "日用品", "3C", "其他"] },
-    "交通": { icon: "🚗", subs: ["機車", "大眾運輸", "計程車", "停車"] },
-    "娛樂": { icon: "🎮", subs: ["電影", "遊戲", "旅遊", "其他"] },
-    "貓咪": { icon: "🐱", subs: ["飼料", "醫療", "玩具", "其他"] },
-    "學校": { icon: "📚", subs: ["課程費", "書籍", "文具", "均攤費用"] },
-    "醫療": { icon: "💊", subs: ["掛號", "藥品", "健檢"] },
-    "居家": { icon: "🏠", subs: ["房租", "水電", "維修"] },
-    "收入": { icon: "💰", subs: ["薪資", "兼職", "獎金", "其他"] },
-  },
-  settings: {
-    currency: "NT$",
-    mainAccountId: "acc1",
-    savingsGoal: 100000,
-  }
-};
+<!-- More menu overlay -->
+<div class="overlay" id="moreMenu" onclick="if(event.target===this)closeMore()">
+  <div class="modal" style="padding-bottom:80px">
+    <div class="modal-handle"></div>
+    <div class="modal-title">更多功能</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button class="btn" style="height:64px;font-size:14px" onclick="closeMore();goto('subs')">⊛ 訂閱</button>
+      <button class="btn" style="height:64px;font-size:14px" onclick="closeMore();goto('debts')">⇌ 代墊/借貸</button>
+      <button class="btn" style="height:64px;font-size:14px" onclick="closeMore();goto('planned')">◷ 計劃支出</button>
+      <button class="btn" style="height:64px;font-size:14px" onclick="closeMore();goto('income')">↑ 收入</button>
+      <button class="btn" style="height:64px;font-size:14px" onclick="closeMore();goto('accounts')">◉ 帳戶</button>
+      <button class="btn" style="height:64px;font-size:14px" onclick="closeMore();goto('settings')">⚙ 設定</button>
+    </div>
+  </div>
+</div>
 
-// ============================================================
+<!-- Add Transaction Modal -->
+<div class="overlay" id="txOverlay" onclick="if(event.target===this)closeModal('txOverlay')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="txModalTitle">新增記帳</div>
+    <input type="hidden" id="txEditId">
+    <div class="fg">
+      <label>日期</label>
+      <input type="date" id="txDate">
+    </div>
+    <div class="fg">
+      <label>金額</label>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="btn btn-sm" id="txTypeExpense" onclick="setTxType('expense')" style="flex:1;background:var(--red-bg);color:var(--red);border-color:rgba(208,48,96,.3)">支出</button>
+        <button class="btn btn-sm" id="txTypeIncome" onclick="setTxType('income')" style="flex:1">收入</button>
+      </div>
+      <input type="number" id="txAmount" placeholder="0" inputmode="decimal">
+    </div>
+    <div class="fg">
+      <label>分類</label>
+      <select id="txCategory" onchange="updateSubcats()"></select>
+    </div>
+    <div class="fg" id="txSubcatFg">
+      <label>子分類</label>
+      <select id="txSubcat"></select>
+    </div>
+    <div class="fg">
+      <label>付款方式</label>
+      <select id="txPay"></select>
+    </div>
+    <div class="fg">
+      <label>備注</label>
+      <input type="text" id="txNote" placeholder="說明...">
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="txDeleteBtn" style="display:none" onclick="deleteTx()">刪除</button>
+      <button class="btn" onclick="closeModal('txOverlay')">取消</button>
+      <button class="btn-primary" onclick="saveTx()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Generic Confirm Modal -->
+<div class="overlay" id="confirmOverlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="confirmTitle">確認</div>
+    <div id="confirmMsg" style="font-size:14px;color:var(--text2);margin-bottom:8px"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('confirmOverlay')">取消</button>
+      <button class="btn-red" id="confirmOkBtn">確定</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════
+// DATA
+// ═══════════════════════════
+const KEY = 'finance_v2';
+function defDB(){
+  return {
+    accounts:[
+      {id:'acc1',name:'玉山銀行',balance:50000,icon:'🏦'},
+      {id:'acc2',name:'郵局',balance:15000,icon:'📮'},
+      {id:'acc3',name:'現金',balance:3000,icon:'💵'},
+    ],
+    creditCards:[
+      {id:'cc1',name:'玉山卡',limit:50000,billingDay:25,payDay:15,color:'#5b4fd4'},
+      {id:'cc2',name:'國泰卡',limit:30000,billingDay:20,payDay:10,color:'#0a8a68'},
+    ],
+    transactions:[],
+    subscriptions:[
+      {id:'sub1',name:'Netflix',amount:270,day:15,ccId:'cc1',category:'娛樂',active:true},
+      {id:'sub2',name:'Spotify',amount:149,day:1,ccId:'cc1',category:'娛樂',active:true},
+    ],
+    debtRecords:[],
+    budgets:[
+      {id:'b1',category:'餐飲',monthlyLimit:5000,color:'#f472b6'},
+      {id:'b2',category:'購物',monthlyLimit:3000,color:'#fbbf24'},
+      {id:'b3',category:'娛樂',monthlyLimit:1500,color:'#60a5fa'},
+      {id:'b4',category:'交通',monthlyLimit:2000,color:'#34d399'},
+    ],
+    plannedExpenses:[],
+    incomeHistory:[],
+    categories:{
+      '餐飲':{icon:'🍜',subs:['早餐','午餐','晚餐','宵夜','飲料','聚餐']},
+      '購物':{icon:'🛍️',subs:['衣物','日用品','3C','其他']},
+      '交通':{icon:'🚗',subs:['機車','大眾運輸','計程車','停車']},
+      '娛樂':{icon:'🎮',subs:['電影','遊戲','旅遊','其他']},
+      '貓咪':{icon:'🐱',subs:['飼料','醫療','玩具','其他']},
+      '學校':{icon:'📚',subs:['課程費','書籍','文具','均攤費用']},
+      '醫療':{icon:'💊',subs:['掛號','藥品','健檢']},
+      '居家':{icon:'🏠',subs:['房租','水電','維修']},
+      '收入':{icon:'💰',subs:['薪資','兼職','獎金','找零','其他']},
+      '其他':{icon:'📌',subs:['其他']},
+    },
+    settings:{currency:'NT$',savingsGoal:100000},
+  };
+}
+let db = (() => { try{ return JSON.parse(localStorage.getItem(KEY)) || defDB(); } catch{ return defDB(); } })();
+function save(){ localStorage.setItem(KEY, JSON.stringify(db)); }
+
+// ═══════════════════════════
 // UTILS
-// ============================================================
-const fmt = (n) => {
-  const abs = Math.abs(n);
-  const s = abs >= 10000 ? (abs / 10000).toFixed(1) + "萬" : abs.toLocaleString();
-  return (n < 0 ? "-" : "") + "NT$" + s;
-};
-const fmtFull = (n) => (n < 0 ? "-NT$" : "NT$") + Math.abs(n).toLocaleString();
-const today = () => new Date().toISOString().split("T")[0];
-const currentMonth = () => new Date().toISOString().slice(0, 7);
-
-function useLocalStorage(key, initial) {
-  const [val, setVal] = useState(() => {
-    try {
-      const stored = localStorage.getItem(key);
-      return stored ? JSON.parse(stored) : initial;
-    } catch { return initial; }
-  });
-  const set = useCallback((v) => {
-    setVal(v);
-    try { localStorage.setItem(key, JSON.stringify(v)); } catch {}
-  }, [key]);
-  return [val, set];
+// ═══════════════════════════
+const uid = () => '_'+Math.random().toString(36).slice(2,8);
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const today = () => new Date().toISOString().slice(0,10);
+const curMonth = () => today().slice(0,7);
+const fmt = n => { const a=Math.abs(n); const s=a>=10000?(a/10000).toFixed(1)+'萬':a.toLocaleString(); return (n<0?'-':'')+'NT$'+s; };
+const fmtFull = n => (n<0?'-NT$':'NT$')+Math.abs(n).toLocaleString();
+function daysUntil(dayOfMonth){
+  const t=new Date(); let d=new Date(t.getFullYear(),t.getMonth(),dayOfMonth);
+  if(d<=t) d=new Date(t.getFullYear(),t.getMonth()+1,dayOfMonth);
+  return Math.ceil((d-t)/(1000*60*60*24));
 }
-
-// ============================================================
-// MODAL
-// ============================================================
-function Modal({ title, onClose, children }) {
-  return (
-    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="modal">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 8 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 700 }}>{title}</h3>
-          <button className="btn-ghost btn-sm" onClick={onClose}>✕</button>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
+function ccUsed(ccId){
+  const cc=db.creditCards.find(c=>c.id===ccId); if(!cc)return 0;
+  const t=new Date(); let cycleStart=new Date(t.getFullYear(),t.getMonth(),cc.billingDay);
+  if(t.getDate()<cc.billingDay) cycleStart=new Date(t.getFullYear(),t.getMonth()-1,cc.billingDay);
+  return db.transactions.filter(tx=>tx.ccId===ccId&&tx.amount<0&&new Date(tx.date)>=cycleStart).reduce((s,tx)=>s+Math.abs(tx.amount),0);
 }
+function thisMonthTx(){ return db.transactions.filter(t=>t.date.startsWith(curMonth())); }
+function thisMonthSpend(){ return thisMonthTx().filter(t=>t.amount<0).reduce((s,t)=>s+Math.abs(t.amount),0); }
+function thisMonthIncome(){ return thisMonthTx().filter(t=>t.amount>0).reduce((s,t)=>s+t.amount,0); }
+function catIcon(name){ return db.categories[name]?.icon||'📌'; }
+function toast(msg,dur=2500){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),dur); }
 
-// ============================================================
-// SIDEBAR NAV
-// ============================================================
-const navItems = [
-  { id: "dashboard", icon: "◈", label: "總覽" },
-  { id: "transactions", icon: "⟳", label: "記帳" },
-  { id: "budget", icon: "◎", label: "預算" },
-  { id: "cards", icon: "▣", label: "信用卡" },
-  { id: "subscriptions", icon: "⊛", label: "訂閱" },
-  { id: "debts", icon: "⇌", label: "代墊/借貸" },
-  { id: "planned", icon: "◷", label: "計劃支出" },
-  { id: "income", icon: "↑", label: "收入管理" },
-  { id: "accounts", icon: "◉", label: "帳戶" },
-  { id: "export", icon: "↗", label: "匯出/串接" },
-];
-
-// ============================================================
-// DASHBOARD
-// ============================================================
-function Dashboard({ data }) {
-  const { accounts, creditCards, transactions, budgets, debtRecords, plannedExpenses, incomeHistory, subscriptions } = data;
-  
-  const totalAssets = accounts.reduce((s, a) => s + a.balance, 0);
-  const totalDebt = creditCards.reduce((s, c) => s + (c.paid ? 0 : c.currentBill), 0);
-  const netWorth = totalAssets - totalDebt;
-  
-  const thisMonth = currentMonth();
-  const monthTxns = transactions.filter(t => t.date.startsWith(thisMonth));
-  const monthExpense = monthTxns.filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
-  const monthIncome = monthTxns.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0);
-  
-  const owedToMe = debtRecords.filter(d => d.type === "owed_to_me" && !d.settled).reduce((s, d) => s + d.amount, 0);
-  const iOwe = debtRecords.filter(d => d.type === "i_owe" && !d.settled).reduce((s, d) => s + d.amount, 0);
-  
-  const totalSubs = subscriptions.filter(s => s.active).reduce((sum, s) => {
-    const myShare = s.shared ? s.amount - s.sharedWith.reduce((a, p) => a + p.amount, 0) : s.amount;
-    return sum + myShare;
-  }, 0);
-
-  const upcomingPlanned = plannedExpenses.filter(p => p.date >= today()).sort((a,b) => a.date.localeCompare(b.date)).slice(0, 3);
-  
-  const lastIncome = incomeHistory[incomeHistory.length - 1];
-  
-  const budgetStatus = budgets.map(b => {
-    const spent = monthTxns.filter(t => t.category === b.category && t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
-    return { ...b, spent, pct: Math.min((spent / b.monthlyLimit) * 100, 100) };
-  });
-
-  return (
-    <div style={{ padding: "24px", overflowY: "auto", height: "100%" }} className="scrollbar-thin">
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 12, color: "var(--text3)", marginBottom: 4, letterSpacing: 2 }}>FINANCE DASHBOARD</div>
-        <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: -1 }}>財務總覽</h1>
-      </div>
-
-      {/* Top Stats */}
-      <div className="stats-grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
-        {[
-          { label: "淨資產", value: netWorth, color: netWorth >= 0 ? "var(--green)" : "var(--red)", sub: `資產 ${fmt(totalAssets)}` },
-          { label: "本月支出", value: -monthExpense, color: "var(--red)", sub: `收入 ${fmt(monthIncome)}` },
-          { label: "別人欠我", value: owedToMe, color: "var(--yellow)", sub: `我欠別人 ${fmt(iOwe)}` },
-          { label: "月訂閱費", value: -totalSubs, color: "var(--accent)", sub: `${subscriptions.filter(s=>s.active).length} 項訂閱` },
-        ].map((s, i) => (
-          <div key={i} className="card" style={{ position: "relative", overflow: "hidden" }}>
-            <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 8, letterSpacing: 1 }}>{s.label.toUpperCase()}</div>
-            <div className="mono" style={{ fontSize: 20, fontWeight: 500, color: s.color }}>{fmt(s.value)}</div>
-            <div style={{ fontSize: 11, color: "var(--text3)", marginTop: 4 }}>{s.sub}</div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
-        {/* Accounts */}
-        <div className="card">
-          <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 14, color: "var(--text2)", letterSpacing: 1 }}>帳戶餘額</div>
-          {accounts.map(a => (
-            <div key={a.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid var(--border)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: a.color }} />
-                <span style={{ fontSize: 13 }}>{a.name}</span>
-                <span className="tag badge-blue" style={{ fontSize: 10 }}>{a.type === "main" ? "主" : a.type === "cash" ? "現金" : "副"}</span>
-              </div>
-              <span className="mono" style={{ fontSize: 14, color: "var(--green)" }}>{fmtFull(a.balance)}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Credit Cards Due */}
-        <div className="card">
-          <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 14, color: "var(--text2)", letterSpacing: 1 }}>信用卡待繳</div>
-          {creditCards.map(c => (
-            <div key={c.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid var(--border)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 8, height: 8, borderRadius: 2, background: c.color }} />
-                <div>
-                  <div style={{ fontSize: 13 }}>{c.name}</div>
-                  <div style={{ fontSize: 11, color: "var(--text3)" }}>繳費日 {c.dueDay}號</div>
-                </div>
-              </div>
-              <div style={{ textAlign: "right" }}>
-                <div className="mono" style={{ fontSize: 14, color: c.paid ? "var(--green)" : "var(--red)" }}>{fmtFull(c.currentBill)}</div>
-                <span className={`tag ${c.paid ? "badge-green" : "badge-red"}`} style={{ fontSize: 10 }}>{c.paid ? "已繳" : "未繳"}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: 20, marginBottom: 20 }}>
-        {/* Budget Status */}
-        <div className="card">
-          <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 14, color: "var(--text2)", letterSpacing: 1 }}>本月預算進度</div>
-          {budgetStatus.map(b => (
-            <div key={b.id} style={{ marginBottom: 12 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                <span style={{ fontSize: 12 }}>{data.categories[b.category]?.icon} {b.category}</span>
-                <span className="mono" style={{ fontSize: 12, color: b.pct >= 100 ? "var(--red)" : b.pct >= 75 ? "var(--yellow)" : "var(--text2)" }}>
-                  {fmtFull(b.spent)} / {fmtFull(b.monthlyLimit)}
-                </span>
-              </div>
-              <div style={{ background: "var(--bg3)", borderRadius: 4, height: 6, overflow: "hidden" }}>
-                <div style={{ width: `${b.pct}%`, height: "100%", background: b.pct >= 100 ? "var(--red)" : b.pct >= 75 ? "var(--yellow)" : b.color, borderRadius: 4, transition: "width 0.5s" }} />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Upcoming */}
-        <div className="card">
-          <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 14, color: "var(--text2)", letterSpacing: 1 }}>即將來臨</div>
-          {upcomingPlanned.map(p => (
-            <div key={p.id} style={{ padding: "10px 0", borderBottom: "1px solid var(--border)" }}>
-              <div style={{ fontSize: 13, marginBottom: 2 }}>{p.name}</div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontSize: 11, color: "var(--text3)" }}>{p.date}</span>
-                <span className="mono" style={{ fontSize: 13, color: "var(--yellow)" }}>{fmtFull(p.amount)}</span>
-              </div>
-              <div style={{ background: "var(--bg3)", borderRadius: 4, height: 4, marginTop: 6 }}>
-                <div style={{ width: `${Math.min((p.saved / p.amount) * 100, 100)}%`, height: "100%", background: "var(--accent)", borderRadius: 4 }} />
-              </div>
-            </div>
-          ))}
-          <div style={{ marginTop: 14, padding: "10px", background: "var(--bg3)", borderRadius: 8 }}>
-            <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 4 }}>上月薪資</div>
-            <div className="mono" style={{ fontSize: 16, color: "var(--green)" }}>{fmtFull(lastIncome?.amount || 0)}</div>
-            {lastIncome?.estimated && <span className="tag badge-yellow" style={{ fontSize: 10, marginTop: 4 }}>預估</span>}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+// ═══════════════════════════
+// NAV
+// ═══════════════════════════
+let activePage = 'dashboard';
+function goto(id){
+  if(id==='more'){ document.getElementById('moreMenu').classList.add('open'); return; }
+  activePage=id;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id)?.classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const nb=document.getElementById('nb-'+id); if(nb) nb.classList.add('active');
+  renderPage(id);
+  window.scrollTo(0,0);
 }
+function closeMore(){ document.getElementById('moreMenu').classList.remove('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function openModal(id){ document.getElementById(id).classList.add('open'); }
 
-// ============================================================
-// TRANSACTIONS
-// ============================================================
-function Transactions({ data, setData }) {
-  const [showAdd, setShowAdd] = useState(false);
-  const [filter, setFilter] = useState({ month: currentMonth(), category: "" });
-  const [form, setForm] = useState({
-    date: today(), amount: "", type: "expense", category: "餐飲", subcategory: "",
-    note: "", accountId: "acc3", cardId: "", splitGroup: ""
-  });
-
-  const filtered = data.transactions
-    .filter(t => t.date.startsWith(filter.month) && (!filter.category || t.category === filter.category))
-    .sort((a, b) => b.date.localeCompare(a.date));
-
-  const addTx = () => {
-    if (!form.amount) return;
-    const amt = parseFloat(form.amount) * (form.type === "expense" ? -1 : 1);
-    const tx = { ...form, id: "t" + Date.now(), amount: amt };
-    setData(d => ({ ...d, transactions: [tx, ...d.transactions] }));
-    setShowAdd(false);
-    setForm({ date: today(), amount: "", type: "expense", category: "餐飲", subcategory: "", note: "", accountId: "acc3", cardId: "", splitGroup: "" });
+// ═══════════════════════════
+// RENDER PAGES
+// ═══════════════════════════
+function renderPage(id){
+  const pages = {
+    dashboard: renderDashboard,
+    tx: renderTx,
+    budget: renderBudget,
+    cards: renderCards,
+    subs: renderSubs,
+    debts: renderDebts,
+    planned: renderPlanned,
+    income: renderIncome,
+    accounts: renderAccounts,
+    settings: renderSettings,
   };
-
-  const deleteTx = (id) => setData(d => ({ ...d, transactions: d.transactions.filter(t => t.id !== id) }));
-
-  const monthTotal = filtered.reduce((s, t) => s + t.amount, 0);
-
-  return (
-    <div className="page-pad" style={{ padding: 24, height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
-        <div>
-          <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>TRANSACTIONS</div>
-          <h1 style={{ fontSize: 22, fontWeight: 800 }}>記帳明細</h1>
-        </div>
-        <button className="btn-primary" onClick={() => setShowAdd(true)}>+ 新增</button>
-      </div>
-
-      <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
-        <input type="month" value={filter.month} onChange={e => setFilter(f => ({ ...f, month: e.target.value }))} style={{ width: 150 }} />
-        <select value={filter.category} onChange={e => setFilter(f => ({ ...f, category: e.target.value }))} style={{ width: 130 }}>
-          <option value="">全部分類</option>
-          {Object.keys(data.categories).map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
-        <div className="mono" style={{ marginLeft: "auto", fontSize: 14, color: monthTotal >= 0 ? "var(--green)" : "var(--red)", alignSelf: "center" }}>
-          本月合計: {fmtFull(monthTotal)}
-        </div>
-      </div>
-
-      <div style={{ overflowY: "auto", flex: 1 }} className="scrollbar-thin">
-        {filtered.map(t => {
-          const cat = data.categories[t.category];
-          const card = t.cardId ? data.creditCards.find(c => c.id === t.cardId) : null;
-          return (
-            <div key={t.id} style={{ display: "flex", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--border)", gap: 12 }}>
-              <div style={{ fontSize: 22, width: 36, textAlign: "center" }}>{cat?.icon || "💳"}</div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
-                  <span style={{ fontSize: 14, fontWeight: 600 }}>{t.note || t.category}</span>
-                  <span className="tag badge-purple" style={{ fontSize: 10 }}>{t.category}</span>
-                  {t.subcategory && <span className="tag badge-blue" style={{ fontSize: 10 }}>{t.subcategory}</span>}
-                  {t.splitGroup && <span className="tag badge-yellow" style={{ fontSize: 10 }}>均攤</span>}
-                </div>
-                <div style={{ fontSize: 11, color: "var(--text3)" }}>
-                  {t.date}
-                  {card && <span style={{ marginLeft: 8, color: card.color }}>● {card.name}</span>}
-                  {t.accountId && !card && <span style={{ marginLeft: 8 }}>· {data.accounts.find(a => a.id === t.accountId)?.name}</span>}
-                </div>
-              </div>
-              <div className="mono" style={{ fontSize: 16, color: t.amount < 0 ? "var(--red)" : "var(--green)", fontWeight: 500 }}>
-                {t.amount > 0 ? "+" : ""}{fmtFull(t.amount)}
-              </div>
-              <button className="btn-danger btn-sm" onClick={() => deleteTx(t.id)}>✕</button>
-            </div>
-          );
-        })}
-      </div>
-
-      {showAdd && (
-        <Modal title="新增記帳" onClose={() => setShowAdd(false)}>
-          <div className="grid-2">
-            <div className="form-group">
-              <label>日期</label>
-              <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
-            </div>
-            <div className="form-group">
-              <label>類型</label>
-              <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
-                <option value="expense">支出</option>
-                <option value="income">收入</option>
-              </select>
-            </div>
-          </div>
-          <div className="form-group">
-            <label>金額 (NT$)</label>
-            <input type="number" placeholder="0" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
-          </div>
-          <div className="grid-2">
-            <div className="form-group">
-              <label>分類</label>
-              <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value, subcategory: "" }))}>
-                {Object.keys(data.categories).map(c => <option key={c} value={c}>{data.categories[c].icon} {c}</option>)}
-              </select>
-            </div>
-            <div className="form-group">
-              <label>子分類</label>
-              <select value={form.subcategory} onChange={e => setForm(f => ({ ...f, subcategory: e.target.value }))}>
-                <option value="">不選</option>
-                {(data.categories[form.category]?.subs || []).map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
-          </div>
-          <div className="form-group">
-            <label>備註</label>
-            <input placeholder="備註說明..." value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} />
-          </div>
-          <div className="grid-2">
-            <div className="form-group">
-              <label>付款帳戶</label>
-              <select value={form.accountId} onChange={e => setForm(f => ({ ...f, accountId: e.target.value, cardId: "" }))}>
-                <option value="">— 使用信用卡 —</option>
-                {data.accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-              </select>
-            </div>
-            <div className="form-group">
-              <label>信用卡</label>
-              <select value={form.cardId} onChange={e => setForm(f => ({ ...f, cardId: e.target.value, accountId: "" }))}>
-                <option value="">— 現金/帳戶 —</option>
-                {data.creditCards.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-            </div>
-          </div>
-          <div className="form-group">
-            <label>均攤群組 (選填，填群組代號如 trip2025)</label>
-            <input placeholder="空白=不均攤" value={form.splitGroup} onChange={e => setForm(f => ({ ...f, splitGroup: e.target.value }))} />
-          </div>
-          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 8 }}>
-            <button className="btn-ghost" onClick={() => setShowAdd(false)}>取消</button>
-            <button className="btn-primary" onClick={addTx}>新增</button>
-          </div>
-        </Modal>
-      )}
-    </div>
-  );
+  pages[id]?.();
 }
 
-// ============================================================
-// BUDGET
-// ============================================================
-function Budget({ data, setData }) {
-  const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState({ category: "餐飲", monthlyLimit: "", color: "#7c6af0" });
+// ─── DASHBOARD ───
+function renderDashboard(){
+  const el=document.getElementById('page-dashboard');
+  const spend=thisMonthSpend(), income=thisMonthIncome();
+  const bank=db.accounts.reduce((s,a)=>s+a.balance,0);
+  const subTotal=db.subscriptions.filter(s=>s.active).reduce((s,sub)=>s+sub.amount,0);
+  const recent=[...db.transactions].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
 
-  const thisMonth = currentMonth();
-  const monthTxns = data.transactions.filter(t => t.date.startsWith(thisMonth));
+  el.innerHTML=`
+  <div class="page-header">
+    <div><div class="page-title">財務總覽</div><div class="page-sub">${today()}</div></div>
+    <button class="btn-primary btn-sm" onclick="openAddTx()">＋ 記帳</button>
+  </div>
 
-  const budgetStatus = data.budgets.map(b => {
-    const spent = monthTxns.filter(t => t.category === b.category && t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
-    const remaining = b.monthlyLimit - spent;
-    const pct = Math.min((spent / b.monthlyLimit) * 100, 100);
-    return { ...b, spent, remaining, pct };
-  });
-
-  const totalBudget = data.budgets.reduce((s, b) => s + b.monthlyLimit, 0);
-  const totalSpent = budgetStatus.reduce((s, b) => s + b.spent, 0);
-
-  const addBudget = () => {
-    if (!form.monthlyLimit) return;
-    setData(d => ({ ...d, budgets: [...d.budgets, { ...form, id: "b" + Date.now(), monthlyLimit: parseFloat(form.monthlyLimit) }] }));
-    setShowAdd(false);
-  };
-
-  const deleteBudget = (id) => setData(d => ({ ...d, budgets: d.budgets.filter(b => b.id !== id) }));
-
-  return (
-    <div className="page-pad scrollbar-thin" style={{ padding: 24, overflowY: "auto", height: "100%" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
-        <div>
-          <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>BUDGET TRACKER</div>
-          <h1 style={{ fontSize: 22, fontWeight: 800 }}>預算管理</h1>
-        </div>
-        <button className="btn-primary" onClick={() => setShowAdd(true)}>+ 新增預算</button>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 24 }}>
-        <div className="card">
-          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>月總預算</div>
-          <div className="mono" style={{ fontSize: 22, color: "var(--blue)" }}>{fmtFull(totalBudget)}</div>
-        </div>
-        <div className="card">
-          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>已花費</div>
-          <div className="mono" style={{ fontSize: 22, color: "var(--red)" }}>{fmtFull(totalSpent)}</div>
-        </div>
-        <div className="card">
-          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>剩餘</div>
-          <div className="mono" style={{ fontSize: 22, color: totalBudget - totalSpent >= 0 ? "var(--green)" : "var(--red)" }}>{fmtFull(totalBudget - totalSpent)}</div>
-        </div>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-        {budgetStatus.map(b => (
-          <div key={b.id} className="card" style={{ borderLeft: `3px solid ${b.color}` }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 20 }}>{data.categories[b.category]?.icon}</span>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 700 }}>{b.category}</div>
-                  <div style={{ fontSize: 11, color: "var(--text3)" }}>月上限 {fmtFull(b.monthlyLimit)}</div>
-                </div>
-              </div>
-              <button className="btn-danger btn-sm" onClick={() => deleteBudget(b.id)}>✕</button>
-            </div>
-            <div style={{ background: "var(--bg3)", borderRadius: 6, height: 10, overflow: "hidden", marginBottom: 8 }}>
-              <div style={{ width: `${b.pct}%`, height: "100%", background: b.pct >= 100 ? "var(--red)" : b.pct >= 80 ? "var(--yellow)" : b.color, borderRadius: 6, transition: "width 0.5s" }} />
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span className="mono" style={{ fontSize: 12, color: "var(--red)" }}>已花 {fmtFull(b.spent)}</span>
-              <span className="mono" style={{ fontSize: 12, color: b.remaining >= 0 ? "var(--green)" : "var(--red)" }}>剩 {fmtFull(b.remaining)}</span>
-            </div>
-            {b.pct >= 100 && <div style={{ marginTop: 8, padding: "4px 8px", background: "rgba(248,113,113,0.1)", borderRadius: 6, fontSize: 11, color: "var(--red)" }}>⚠️ 已超出預算 {fmtFull(Math.abs(b.remaining))}</div>}
-            {b.pct >= 80 && b.pct < 100 && <div style={{ marginTop: 8, padding: "4px 8px", background: "rgba(251,191,36,0.1)", borderRadius: 6, fontSize: 11, color: "var(--yellow)" }}>⚠️ 接近上限，剩 {fmtFull(b.remaining)}</div>}
-          </div>
-        ))}
-      </div>
-
-      {showAdd && (
-        <Modal title="新增預算分類" onClose={() => setShowAdd(false)}>
-          <div className="form-group">
-            <label>分類</label>
-            <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
-              {Object.keys(data.categories).filter(c => !data.budgets.find(b => b.category === c)).map(c => (
-                <option key={c} value={c}>{data.categories[c].icon} {c}</option>
-              ))}
-            </select>
-          </div>
-          <div className="form-group">
-            <label>每月上限 (NT$)</label>
-            <input type="number" placeholder="0" value={form.monthlyLimit} onChange={e => setForm(f => ({ ...f, monthlyLimit: e.target.value }))} />
-          </div>
-          <div className="form-group">
-            <label>顏色</label>
-            <input type="color" value={form.color} onChange={e => setForm(f => ({ ...f, color: e.target.value }))} style={{ height: 40, padding: 4 }} />
-          </div>
-          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-            <button className="btn-ghost" onClick={() => setShowAdd(false)}>取消</button>
-            <button className="btn-primary" onClick={addBudget}>新增</button>
-          </div>
-        </Modal>
-      )}
+  <div class="kpi-row">
+    <div class="kpi full green">
+      <div class="kpi-label">銀行 + 現金</div>
+      <div class="kpi-value mono">${fmt(bank)}</div>
+      <div class="kpi-sub">所有帳戶合計</div>
     </div>
-  );
+  </div>
+  <div class="kpi-row">
+    <div class="kpi red">
+      <div class="kpi-label">本月支出</div>
+      <div class="kpi-value mono" style="color:var(--red)">${fmt(spend)}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">本月收入</div>
+      <div class="kpi-value mono" style="color:var(--green)">${fmt(income)}</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-bottom:16px">
+    ${db.creditCards.map(cc=>{
+      const used=ccUsed(cc.id), pct=Math.min(100,used/cc.limit*100);
+      const barCls=pct>80?'over':pct>60?'warn':'';
+      return `<div class="kpi" style="flex:1;border-color:${cc.color}33">
+        <div class="kpi-label">${esc(cc.name)}</div>
+        <div class="mono" style="font-size:16px;font-weight:700;color:var(--red)">${fmtFull(used)}</div>
+        <div class="cc-bar-bg"><div class="cc-bar ${barCls}" style="width:${pct}%;background:${cc.color}"></div></div>
+        <div style="font-size:11px;color:var(--text3)">結帳 ${daysUntil(cc.billingDay)}天後</div>
+      </div>`;
+    }).join('')}
+  </div>
+
+  <div class="sec-hd">最近記帳</div>
+  <div class="tx-list">
+    ${recent.length?recent.map(txRowHtml).join(''):'<div style="text-align:center;padding:24px;color:var(--text3)">還沒有記帳記錄</div>'}
+  </div>
+  ${recent.length?`<button class="btn" style="width:100%;margin-top:10px" onclick="goto('tx')">查看全部 →</button>`:''}`;
 }
 
-// ============================================================
-// CREDIT CARDS
-// ============================================================
-function CreditCards({ data, setData }) {
-  const [showAdd, setShowAdd] = useState(false);
-  const [editId, setEditId] = useState(null);
-  const [form, setForm] = useState({ name: "", color: "#7c6af0", billingDay: 25, dueDay: 15, currentBill: 0, paid: false });
-
-  const togglePaid = (id) => setData(d => ({ ...d, creditCards: d.creditCards.map(c => c.id === id ? { ...c, paid: !c.paid } : c) }));
-  const deleteCard = (id) => setData(d => ({ ...d, creditCards: d.creditCards.filter(c => c.id !== id) }));
-  const saveCard = () => {
-    if (!form.name) return;
-    if (editId) {
-      setData(d => ({ ...d, creditCards: d.creditCards.map(c => c.id === editId ? { ...form, id: editId } : c) }));
-    } else {
-      setData(d => ({ ...d, creditCards: [...d.creditCards, { ...form, id: "cc" + Date.now() }] }));
-    }
-    setShowAdd(false); setEditId(null);
-    setForm({ name: "", color: "#7c6af0", billingDay: 25, dueDay: 15, currentBill: 0, paid: false });
-  };
-
-  const openEdit = (c) => { setForm(c); setEditId(c.id); setShowAdd(true); };
-
-  return (
-    <div className="page-pad scrollbar-thin" style={{ padding: 24, overflowY: "auto", height: "100%" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
-        <div>
-          <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>CREDIT CARDS</div>
-          <h1 style={{ fontSize: 22, fontWeight: 800 }}>信用卡管理</h1>
-        </div>
-        <button className="btn-primary" onClick={() => setShowAdd(true)}>+ 新增卡片</button>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-        {data.creditCards.map(c => {
-          const cardTxns = data.transactions.filter(t => t.cardId === c.id && t.date.startsWith(currentMonth()));
-          const cardSubs = data.subscriptions.filter(s => s.cardId === c.id && s.active);
-          return (
-            <div key={c.id} className="card" style={{ background: `linear-gradient(135deg, ${c.color}22, var(--card))`, borderColor: c.color + "44" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
-                <div>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: c.color }}>{c.name}</div>
-                  <div style={{ fontSize: 11, color: "var(--text3)", marginTop: 2 }}>結帳日 {c.billingDay}號 | 繳費日 {c.dueDay}號</div>
-                </div>
-                <div style={{ display: "flex", gap: 6 }}>
-                  <button className="btn-ghost btn-sm" onClick={() => openEdit(c)}>✏️</button>
-                  <button className="btn-danger btn-sm" onClick={() => deleteCard(c.id)}>✕</button>
-                </div>
-              </div>
-
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 16 }}>
-                <div>
-                  <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 4 }}>本期帳單</div>
-                  <div className="mono" style={{ fontSize: 24, color: c.paid ? "var(--green)" : "var(--red)", fontWeight: 500 }}>{fmtFull(c.currentBill)}</div>
-                </div>
-                <button
-                  className={c.paid ? "btn-ghost" : "btn-primary"}
-                  onClick={() => togglePaid(c.id)}
-                  style={{ fontSize: 12 }}
-                >
-                  {c.paid ? "✓ 已繳費" : "標記已繳"}
-                </button>
-              </div>
-
-              <div style={{ background: "var(--bg3)", borderRadius: 8, padding: 12 }}>
-                <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 8 }}>本月刷卡明細 ({cardTxns.length} 筆)</div>
-                {cardTxns.slice(0, 3).map(t => (
-                  <div key={t.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
-                    <span>{t.note || t.category}</span>
-                    <span className="mono" style={{ color: "var(--red)" }}>{fmtFull(Math.abs(t.amount))}</span>
-                  </div>
-                ))}
-                {cardSubs.length > 0 && (
-                  <div style={{ borderTop: "1px solid var(--border)", marginTop: 8, paddingTop: 8 }}>
-                    <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 4 }}>定期扣款</div>
-                    {cardSubs.map(s => (
-                      <div key={s.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 3 }}>
-                        <span style={{ color: "var(--accent)" }}>⊛ {s.name}</span>
-                        <span className="mono" style={{ color: "var(--accent)" }}>{fmtFull(s.amount)}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {showAdd && (
-        <Modal title={editId ? "編輯信用卡" : "新增信用卡"} onClose={() => { setShowAdd(false); setEditId(null); }}>
-          <div className="form-group">
-            <label>卡片名稱</label>
-            <input placeholder="玉山 Pi 卡" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
-          </div>
-          <div className="grid-2">
-            <div className="form-group">
-              <label>結帳日</label>
-              <input type="number" min="1" max="31" value={form.billingDay} onChange={e => setForm(f => ({ ...f, billingDay: parseInt(e.target.value) }))} />
-            </div>
-            <div className="form-group">
-              <label>繳費截止日</label>
-              <input type="number" min="1" max="31" value={form.dueDay} onChange={e => setForm(f => ({ ...f, dueDay: parseInt(e.target.value) }))} />
-            </div>
-          </div>
-          <div className="grid-2">
-            <div className="form-group">
-              <label>本期帳單 (NT$)</label>
-              <input type="number" value={form.currentBill} onChange={e => setForm(f => ({ ...f, currentBill: parseFloat(e.target.value) }))} />
-            </div>
-            <div className="form-group">
-              <label>卡片顏色</label>
-              <input type="color" value={form.color} onChange={e => setForm(f => ({ ...f, color: e.target.value }))} style={{ height: 40, padding: 4 }} />
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-            <button className="btn-ghost" onClick={() => { setShowAdd(false); setEditId(null); }}>取消</button>
-            <button className="btn-primary" onClick={saveCard}>{editId ? "儲存" : "新增"}</button>
-          </div>
-        </Modal>
-      )}
+function txRowHtml(tx){
+  const cat=db.categories[tx.category]||{icon:'📌'};
+  const acc=tx.accId?db.accounts.find(a=>a.id===tx.accId):null;
+  const cc=tx.ccId?db.creditCards.find(c=>c.id===tx.ccId):null;
+  const via=cc?cc.name:acc?acc.name:'';
+  return `<div class="tx-row" onclick="openEditTx('${tx.id}')">
+    <div class="tx-icon">${cat.icon}</div>
+    <div class="tx-info">
+      <div class="tx-name">${esc(tx.note||tx.category)}</div>
+      <div class="tx-meta">${tx.date}${via?' · '+esc(via):''} · ${esc(tx.category)}</div>
     </div>
-  );
+    <div class="tx-amount ${tx.amount<0?'neg':'pos'}">${tx.amount<0?'-':'+'} ${fmtFull(Math.abs(tx.amount))}</div>
+  </div>`;
 }
 
-// ============================================================
-// SUBSCRIPTIONS
-// ============================================================
-function Subscriptions({ data, setData }) {
-  const [showAdd, setShowAdd] = useState(false);
-  const [editId, setEditId] = useState(null);
-  const [form, setForm] = useState({ name: "", amount: "", cycle: "monthly", day: 1, cardId: "", category: "娛樂", shared: false, sharedWith: [], active: true });
+// ─── TRANSACTIONS ───
+let txMonth = curMonth();
+function renderTx(){
+  const el=document.getElementById('page-tx');
+  const months=[...new Set(db.transactions.map(t=>t.date.slice(0,7)))].sort().reverse();
+  if(!months.includes(txMonth)) txMonth=curMonth();
+  const filtered=[...db.transactions].filter(t=>t.date.startsWith(txMonth)).sort((a,b)=>b.date.localeCompare(a.date));
+  const spend=filtered.filter(t=>t.amount<0).reduce((s,t)=>s+Math.abs(t.amount),0);
+  const inc=filtered.filter(t=>t.amount>0).reduce((s,t)=>s+t.amount,0);
 
-  const totalMyShare = data.subscriptions.filter(s => s.active).reduce((sum, s) => {
-    const myShare = s.shared ? s.amount - s.sharedWith.reduce((a, p) => a + p.amount, 0) : s.amount;
-    return sum + myShare;
-  }, 0);
-
-  const totalAnnual = data.subscriptions.filter(s => s.active).reduce((sum, s) => {
-    const myShare = s.shared ? s.amount - s.sharedWith.reduce((a, p) => a + p.amount, 0) : s.amount;
-    return sum + myShare * (s.cycle === "monthly" ? 12 : s.cycle === "yearly" ? 1 : 52);
-  }, 0);
-
-  const saveSubscription = () => {
-    if (!form.name || !form.amount) return;
-    const sub = { ...form, amount: parseFloat(form.amount) };
-    if (editId) {
-      setData(d => ({ ...d, subscriptions: d.subscriptions.map(s => s.id === editId ? { ...sub, id: editId } : s) }));
-    } else {
-      setData(d => ({ ...d, subscriptions: [...d.subscriptions, { ...sub, id: "sub" + Date.now() }] }));
-    }
-    setShowAdd(false); setEditId(null);
-    setForm({ name: "", amount: "", cycle: "monthly", day: 1, cardId: "", category: "娛樂", shared: false, sharedWith: [], active: true });
-  };
-
-  const toggleActive = (id) => setData(d => ({ ...d, subscriptions: d.subscriptions.map(s => s.id === id ? { ...s, active: !s.active } : s) }));
-  const deleteSub = (id) => setData(d => ({ ...d, subscriptions: d.subscriptions.filter(s => s.id !== id) }));
-  const openEdit = (s) => { setForm(s); setEditId(s.id); setShowAdd(true); };
-
-  const addSharedPerson = () => setForm(f => ({ ...f, sharedWith: [...f.sharedWith, { name: "", amount: 0 }] }));
-
-  return (
-    <div className="page-pad scrollbar-thin" style={{ padding: 24, overflowY: "auto", height: "100%" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
-        <div>
-          <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>SUBSCRIPTIONS</div>
-          <h1 style={{ fontSize: 22, fontWeight: 800 }}>訂閱管理</h1>
-        </div>
-        <button className="btn-primary" onClick={() => setShowAdd(true)}>+ 新增訂閱</button>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
-        <div className="card">
-          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>每月我的負擔</div>
-          <div className="mono" style={{ fontSize: 20, color: "var(--accent)" }}>{fmtFull(totalMyShare)}</div>
-        </div>
-        <div className="card">
-          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>預估年花費</div>
-          <div className="mono" style={{ fontSize: 20, color: "var(--red)" }}>{fmtFull(totalAnnual)}</div>
-        </div>
-        <div className="card">
-          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>啟用訂閱數</div>
-          <div className="mono" style={{ fontSize: 20, color: "var(--yellow)" }}>{data.subscriptions.filter(s => s.active).length} 項</div>
-        </div>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        {data.subscriptions.map(s => {
-          const card = data.creditCards.find(c => c.id === s.cardId);
-          const myShare = s.shared ? s.amount - s.sharedWith.reduce((a, p) => a + p.amount, 0) : s.amount;
-          return (
-            <div key={s.id} className="card" style={{ opacity: s.active ? 1 : 0.5 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 700 }}>{s.name}</div>
-                  <div style={{ fontSize: 11, color: "var(--text3)" }}>每{s.cycle === "monthly" ? "月" : s.cycle === "yearly" ? "年" : "週"} {s.day}號扣</div>
-                </div>
-                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                  <button className="btn-ghost btn-sm" onClick={() => openEdit(s)}>✏️</button>
-                  <button className="btn-ghost btn-sm" onClick={() => toggleActive(s.id)}>{s.active ? "暫停" : "啟用"}</button>
-                  <button className="btn-danger btn-sm" onClick={() => deleteSub(s.id)}>✕</button>
-                </div>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <div className="mono" style={{ fontSize: 18, color: "var(--accent)" }}>{fmtFull(s.amount)}</div>
-                  {s.shared && <div style={{ fontSize: 11, color: "var(--green)" }}>我的份 {fmtFull(myShare)}</div>}
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  {card && <div style={{ fontSize: 11, color: card.color }}>● {card.name}</div>}
-                  <span className="tag badge-purple" style={{ fontSize: 10 }}>{s.category}</span>
-                  {s.shared && <span className="tag badge-yellow" style={{ fontSize: 10, marginLeft: 4 }}>分帳</span>}
-                </div>
-              </div>
-              {s.shared && s.sharedWith.length > 0 && (
-                <div style={{ marginTop: 8, padding: "6px 10px", background: "var(--bg3)", borderRadius: 6 }}>
-                  <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 4 }}>分帳對象</div>
-                  {s.sharedWith.map((p, i) => (
-                    <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
-                      <span>{p.name}</span>
-                      <span className="mono" style={{ color: "var(--green)" }}>負擔 {fmtFull(p.amount)}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {showAdd && (
-        <Modal title={editId ? "編輯訂閱" : "新增訂閱"} onClose={() => { setShowAdd(false); setEditId(null); }}>
-          <div className="form-group">
-            <label>服務名稱</label>
-            <input placeholder="Netflix" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
-          </div>
-          <div className="grid-3">
-            <div className="form-group">
-              <label>金額</label>
-              <input type="number" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
-            </div>
-            <div className="form-group">
-              <label>週期</label>
-              <select value={form.cycle} onChange={e => setForm(f => ({ ...f, cycle: e.target.value }))}>
-                <option value="monthly">每月</option>
-                <option value="yearly">每年</option>
-                <option value="weekly">每週</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label>扣款日</label>
-              <input type="number" min="1" max="31" value={form.day} onChange={e => setForm(f => ({ ...f, day: parseInt(e.target.value) }))} />
-            </div>
-          </div>
-          <div className="grid-2">
-            <div className="form-group">
-              <label>扣款信用卡</label>
-              <select value={form.cardId} onChange={e => setForm(f => ({ ...f, cardId: e.target.value }))}>
-                <option value="">不指定</option>
-                {data.creditCards.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-            </div>
-            <div className="form-group">
-              <label>分類</label>
-              <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
-                {Object.keys(data.categories).map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-            <input type="checkbox" id="shared" checked={form.shared} onChange={e => setForm(f => ({ ...f, shared: e.target.checked }))} style={{ width: "auto" }} />
-            <label htmlFor="shared" style={{ margin: 0, cursor: "pointer" }}>與他人分帳</label>
-          </div>
-          {form.shared && (
-            <div style={{ background: "var(--bg3)", borderRadius: 8, padding: 12, marginBottom: 12 }}>
-              <div style={{ fontSize: 12, color: "var(--text2)", marginBottom: 8 }}>分帳對象</div>
-              {form.sharedWith.map((p, i) => (
-                <div key={i} className="grid-2" style={{ marginBottom: 8 }}>
-                  <input placeholder="對方名字" value={p.name} onChange={e => setForm(f => ({ ...f, sharedWith: f.sharedWith.map((x, j) => j === i ? { ...x, name: e.target.value } : x) }))} />
-                  <input type="number" placeholder="對方負擔金額" value={p.amount} onChange={e => setForm(f => ({ ...f, sharedWith: f.sharedWith.map((x, j) => j === i ? { ...x, amount: parseFloat(e.target.value) || 0 } : x) }))} />
-                </div>
-              ))}
-              <button className="btn-ghost btn-sm" onClick={addSharedPerson}>+ 新增分帳對象</button>
-            </div>
-          )}
-          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-            <button className="btn-ghost" onClick={() => { setShowAdd(false); setEditId(null); }}>取消</button>
-            <button className="btn-primary" onClick={saveSubscription}>{editId ? "儲存" : "新增"}</button>
-          </div>
-        </Modal>
-      )}
-    </div>
-  );
+  el.innerHTML=`
+  <div class="page-header">
+    <div class="page-title">記帳明細</div>
+    <button class="btn-primary btn-sm" onclick="openAddTx()">＋ 記帳</button>
+  </div>
+  <div class="month-scroll">
+    ${[curMonth(),...months].filter((m,i,a)=>a.indexOf(m)===i).slice(0,12).map(m=>`
+      <button class="month-btn${m===txMonth?' active':''}" onclick="txMonth='${m}';renderTx()">${m}</button>`).join('')}
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+    <div class="kpi"><div class="kpi-label">支出</div><div class="kpi-value mono" style="font-size:18px;color:var(--red)">${fmt(spend)}</div></div>
+    <div class="kpi"><div class="kpi-label">收入</div><div class="kpi-value mono" style="font-size:18px;color:var(--green)">${fmt(inc)}</div></div>
+  </div>
+  <div class="tx-list">
+    ${filtered.length?filtered.map(txRowHtml).join(''):'<div style="text-align:center;padding:32px;color:var(--text3)">這個月沒有記錄</div>'}
+  </div>`;
 }
 
-// ============================================================
-// DEBTS
-// ============================================================
-function Debts({ data, setData }) {
-  const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState({ type: "owed_to_me", person: "", amount: "", date: today(), note: "", settled: false });
-
-  const owedToMe = data.debtRecords.filter(d => d.type === "owed_to_me" && !d.settled);
-  const iOwe = data.debtRecords.filter(d => d.type === "i_owe" && !d.settled);
-  const settled = data.debtRecords.filter(d => d.settled);
-
-  const toggleSettle = (id) => setData(d => ({ ...d, debtRecords: d.debtRecords.map(r => r.id === id ? { ...r, settled: !r.settled } : r) }));
-  const deleteRecord = (id) => setData(d => ({ ...d, debtRecords: d.debtRecords.filter(r => r.id !== id) }));
-  const addRecord = () => {
-    if (!form.person || !form.amount) return;
-    setData(d => ({ ...d, debtRecords: [...d.debtRecords, { ...form, id: "d" + Date.now(), amount: parseFloat(form.amount) }] }));
-    setShowAdd(false);
-    setForm({ type: "owed_to_me", person: "", amount: "", date: today(), note: "", settled: false });
-  };
-
-  const DebtCard = ({ record }) => (
-    <div style={{ display: "flex", alignItems: "center", padding: "12px 0", borderBottom: "1px solid var(--border)", gap: 12 }}>
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 3 }}>{record.person}</div>
-        <div style={{ fontSize: 11, color: "var(--text3)" }}>{record.date} · {record.note}</div>
+// ─── BUDGET ───
+function renderBudget(){
+  const el=document.getElementById('page-budget');
+  const mTx=thisMonthTx();
+  el.innerHTML=`
+  <div class="page-header">
+    <div class="page-title">預算管理</div>
+    <button class="btn btn-sm" onclick="openAddBudget()">＋ 新增</button>
+  </div>
+  ${db.budgets.map(b=>{
+    const spent=mTx.filter(t=>t.category===b.category&&t.amount<0).reduce((s,t)=>s+Math.abs(t.amount),0);
+    const pct=Math.min(100,spent/b.monthlyLimit*100);
+    const barCls=pct>100?'over':pct>80?'warn':'';
+    return `<div class="card" style="margin-bottom:10px">
+      <div class="budget-head">
+        <div style="font-weight:700">${catIcon(b.category)} ${esc(b.category)}</div>
+        <div style="font-size:13px"><span style="color:${pct>100?'var(--red)':pct>80?'var(--amber)':'var(--text)'};font-weight:700">${fmtFull(spent)}</span> / ${fmtFull(b.monthlyLimit)}</div>
       </div>
-      <div className="mono" style={{ fontSize: 16, color: record.type === "owed_to_me" ? "var(--green)" : "var(--red)" }}>
-        {record.type === "owed_to_me" ? "+" : "-"}{fmtFull(record.amount)}
+      <div class="budget-bar-bg"><div class="budget-bar ${barCls}" style="width:${pct}%;background:${b.color}"></div></div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px;display:flex;justify-content:space-between">
+        <span>${pct.toFixed(0)}% 已使用</span>
+        <span>剩 ${fmtFull(Math.max(0,b.monthlyLimit-spent))}</span>
       </div>
-      <button className="btn-ghost btn-sm" onClick={() => toggleSettle(record.id)}>✓ 結清</button>
-      <button className="btn-danger btn-sm" onClick={() => deleteRecord(record.id)}>✕</button>
-    </div>
-  );
-
-  return (
-    <div className="page-pad scrollbar-thin" style={{ padding: 24, overflowY: "auto", height: "100%" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
-        <div>
-          <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>DEBT TRACKER</div>
-          <h1 style={{ fontSize: 22, fontWeight: 800 }}>代墊 / 借貸</h1>
-        </div>
-        <button className="btn-primary" onClick={() => setShowAdd(true)}>+ 新增</button>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
-        <div className="card" style={{ borderLeft: "3px solid var(--green)" }}>
-          <div style={{ fontSize: 12, color: "var(--text3)", marginBottom: 8 }}>別人欠我（未結清）</div>
-          <div className="mono" style={{ fontSize: 24, color: "var(--green)" }}>{fmtFull(owedToMe.reduce((s, d) => s + d.amount, 0))}</div>
-          {owedToMe.map(d => <DebtCard key={d.id} record={d} />)}
-          {owedToMe.length === 0 && <div style={{ fontSize: 12, color: "var(--text3)", marginTop: 8 }}>無未結清紀錄</div>}
-        </div>
-        <div className="card" style={{ borderLeft: "3px solid var(--red)" }}>
-          <div style={{ fontSize: 12, color: "var(--text3)", marginBottom: 8 }}>我欠別人（未結清）</div>
-          <div className="mono" style={{ fontSize: 24, color: "var(--red)" }}>{fmtFull(iOwe.reduce((s, d) => s + d.amount, 0))}</div>
-          {iOwe.map(d => <DebtCard key={d.id} record={d} />)}
-          {iOwe.length === 0 && <div style={{ fontSize: 12, color: "var(--text3)", marginTop: 8 }}>沒有欠人家錢 🎉</div>}
-        </div>
-      </div>
-
-      {settled.length > 0 && (
-        <div className="card">
-          <div style={{ fontSize: 12, color: "var(--text3)", marginBottom: 12 }}>已結清紀錄</div>
-          {settled.map(d => (
-            <div key={d.id} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--border)", opacity: 0.5, fontSize: 13 }}>
-              <span>{d.person} · {d.note}</span>
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <span className="mono" style={{ color: d.type === "owed_to_me" ? "var(--green)" : "var(--red)" }}>{fmtFull(d.amount)}</span>
-                <span className="tag badge-green">✓</span>
-                <button className="btn-danger btn-sm" onClick={() => deleteRecord(d.id)}>✕</button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {showAdd && (
-        <Modal title="新增代墊/借貸" onClose={() => setShowAdd(false)}>
-          <div className="form-group">
-            <label>類型</label>
-            <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
-              <option value="owed_to_me">別人欠我（我代墊）</option>
-              <option value="i_owe">我欠別人</option>
-            </select>
-          </div>
-          <div className="grid-2">
-            <div className="form-group">
-              <label>對象</label>
-              <input placeholder="小明" value={form.person} onChange={e => setForm(f => ({ ...f, person: e.target.value }))} />
-            </div>
-            <div className="form-group">
-              <label>金額</label>
-              <input type="number" placeholder="0" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
-            </div>
-          </div>
-          <div className="form-group">
-            <label>日期</label>
-            <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
-          </div>
-          <div className="form-group">
-            <label>備註</label>
-            <input placeholder="聚餐代墊..." value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} />
-          </div>
-          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-            <button className="btn-ghost" onClick={() => setShowAdd(false)}>取消</button>
-            <button className="btn-primary" onClick={addRecord}>新增</button>
-          </div>
-        </Modal>
-      )}
-    </div>
-  );
+    </div>`;
+  }).join('')}
+  ${!db.budgets.length?'<div style="text-align:center;padding:32px;color:var(--text3)">還沒有預算設定</div>':''}`;
 }
 
-// ============================================================
-// PLANNED EXPENSES
-// ============================================================
-function PlannedExpenses({ data, setData }) {
-  const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState({ name: "", amount: "", date: "", priority: "medium", saved: 0 });
-
-  const totalNeeded = data.plannedExpenses.reduce((s, p) => s + p.amount - p.saved, 0);
-  const totalSaved = data.plannedExpenses.reduce((s, p) => s + p.saved, 0);
-
-  const addExpense = () => {
-    if (!form.name || !form.amount) return;
-    setData(d => ({ ...d, plannedExpenses: [...d.plannedExpenses, { ...form, id: "pe" + Date.now(), amount: parseFloat(form.amount), saved: parseFloat(form.saved) || 0 }] }));
-    setShowAdd(false);
-    setForm({ name: "", amount: "", date: "", priority: "medium", saved: 0 });
-  };
-
-  const updateSaved = (id, saved) => setData(d => ({ ...d, plannedExpenses: d.plannedExpenses.map(p => p.id === id ? { ...p, saved: parseFloat(saved) || 0 } : p) }));
-  const deleteExpense = (id) => setData(d => ({ ...d, plannedExpenses: d.plannedExpenses.filter(p => p.id !== id) }));
-
-  const priorityColor = { high: "var(--red)", medium: "var(--yellow)", low: "var(--blue)" };
-  const priorityLabel = { high: "緊急", medium: "一般", low: "計劃" };
-
-  const mainAccount = data.accounts.find(a => a.id === data.settings.mainAccountId);
-  const availableAfterPlanned = (mainAccount?.balance || 0) - totalNeeded;
-
-  return (
-    <div className="page-pad scrollbar-thin" style={{ padding: 24, overflowY: "auto", height: "100%" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
-        <div>
-          <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>PLANNED EXPENSES</div>
-          <h1 style={{ fontSize: 22, fontWeight: 800 }}>計劃支出</h1>
-        </div>
-        <button className="btn-primary" onClick={() => setShowAdd(true)}>+ 新增計劃</button>
+// ─── CARDS ───
+function renderCards(){
+  const el=document.getElementById('page-cards');
+  el.innerHTML=`
+  <div class="page-header">
+    <div class="page-title">信用卡</div>
+    <button class="btn btn-sm" onclick="openAddCC()">＋ 新增</button>
+  </div>
+  ${db.creditCards.map(cc=>{
+    const used=ccUsed(cc.id), pct=Math.min(100,used/cc.limit*100);
+    const barCls=pct>80?'over':pct>60?'warn':'';
+    const recent=[...db.transactions].filter(t=>t.ccId===cc.id).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
+    return `<div class="cc-card">
+      <div class="cc-name"><span style="color:${cc.color}">▌</span>${esc(cc.name)}<button class="btn btn-sm" style="margin-left:auto" onclick="openEditCC('${cc.id}')">編輯</button></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
+        <div><div style="font-size:11px;color:var(--text3)">本期已刷</div><div class="mono" style="font-size:20px;font-weight:700;color:var(--red)">${fmtFull(used)}</div></div>
+        <div><div style="font-size:11px;color:var(--text3)">信用額度</div><div class="mono" style="font-size:20px;font-weight:700">${fmtFull(cc.limit)}</div></div>
+        <div><div style="font-size:11px;color:var(--text3)">結帳日</div><div style="font-size:16px;font-weight:700">${cc.billingDay}日 <span style="font-size:12px;color:var(--amber)">${daysUntil(cc.billingDay)}天後</span></div></div>
+        <div><div style="font-size:11px;color:var(--text3)">繳款日</div><div style="font-size:16px;font-weight:700">${cc.payDay}日 <span style="font-size:12px;color:var(--text3)">${daysUntil(cc.payDay)}天後</span></div></div>
       </div>
+      <div class="cc-bar-bg"><div class="cc-bar ${barCls}" style="width:${pct}%;background:${cc.color}"></div></div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:14px">使用 ${pct.toFixed(0)}%</div>
+      ${recent.length?`<div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:8px">最近消費</div>${recent.map(txRowHtml).join('')}`:''}
+    </div>`;
+  }).join('')}`;
+}
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 24 }}>
-        <div className="card">
-          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>還需存</div>
-          <div className="mono" style={{ fontSize: 20, color: "var(--red)" }}>{fmtFull(totalNeeded)}</div>
-        </div>
-        <div className="card">
-          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>已存備用</div>
-          <div className="mono" style={{ fontSize: 20, color: "var(--green)" }}>{fmtFull(totalSaved)}</div>
-        </div>
-        <div className="card" style={{ borderColor: availableAfterPlanned < 0 ? "var(--red)" : "var(--border)" }}>
-          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>扣除計劃後餘額</div>
-          <div className="mono" style={{ fontSize: 20, color: availableAfterPlanned >= 0 ? "var(--green)" : "var(--red)" }}>{fmtFull(availableAfterPlanned)}</div>
-          {availableAfterPlanned < 0 && <div style={{ fontSize: 11, color: "var(--red)", marginTop: 4 }}>⚠️ 餘額不足！</div>}
-        </div>
+// ─── SUBSCRIPTIONS ───
+function renderSubs(){
+  const el=document.getElementById('page-subs');
+  const total=db.subscriptions.filter(s=>s.active).reduce((s,sub)=>s+sub.amount,0);
+  el.innerHTML=`
+  <div class="page-header">
+    <div><div class="page-title">訂閱管理</div><div class="page-sub mono">每月 ${fmtFull(total)}</div></div>
+    <button class="btn btn-sm" onclick="openAddSub()">＋ 新增</button>
+  </div>
+  ${db.subscriptions.map(sub=>{
+    const cc=db.creditCards.find(c=>c.id===sub.ccId);
+    return `<div class="list-row">
+      <div class="list-info">
+        <div class="list-name">${esc(sub.name)}</div>
+        <div class="list-meta">${cc?esc(cc.name):'現金'} · 每月${sub.day}日 · ${esc(sub.category)}</div>
       </div>
+      <div class="mono" style="font-weight:700;color:var(--accent);margin-right:10px">${fmtFull(sub.amount)}</div>
+      <button class="btn btn-sm ${sub.active?'btn-green':''}" onclick="toggleSub('${sub.id}')">${sub.active?'啟用':'停用'}</button>
+    </div>`;
+  }).join('')}
+  ${!db.subscriptions.length?'<div style="text-align:center;padding:32px;color:var(--text3)">還沒有訂閱</div>':''}`;
+}
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-        {data.plannedExpenses.sort((a, b) => a.date.localeCompare(b.date)).map(p => {
-          const pct = Math.min((p.saved / p.amount) * 100, 100);
-          const remaining = p.amount - p.saved;
-          const daysLeft = Math.ceil((new Date(p.date) - new Date()) / (1000 * 60 * 60 * 24));
-          return (
-            <div key={p.id} className="card">
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 700 }}>{p.name}</div>
-                  <div style={{ fontSize: 11, color: "var(--text3)" }}>{p.date} · {daysLeft > 0 ? `還有 ${daysLeft} 天` : "已到期"}</div>
-                </div>
-                <div style={{ display: "flex", gap: 6 }}>
-                  <span className="tag" style={{ background: priorityColor[p.priority] + "22", color: priorityColor[p.priority], border: `1px solid ${priorityColor[p.priority]}44`, fontSize: 10 }}>{priorityLabel[p.priority]}</span>
-                  <button className="btn-danger btn-sm" onClick={() => deleteExpense(p.id)}>✕</button>
-                </div>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                <span style={{ fontSize: 12, color: "var(--text3)" }}>目標: {fmtFull(p.amount)}</span>
-                <span className="mono" style={{ fontSize: 12, color: "var(--green)" }}>已存: {fmtFull(p.saved)}</span>
-              </div>
-              <div style={{ background: "var(--bg3)", borderRadius: 6, height: 8, overflow: "hidden", marginBottom: 10 }}>
-                <div style={{ width: `${pct}%`, height: "100%", background: pct >= 100 ? "var(--green)" : "var(--accent)", borderRadius: 6 }} />
-              </div>
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <span style={{ fontSize: 12, color: "var(--text3)" }}>已存金額:</span>
-                <input type="number" value={p.saved} onChange={e => updateSaved(p.id, e.target.value)} style={{ flex: 1, padding: "4px 8px", fontSize: 12 }} />
-              </div>
-              {remaining > 0 && <div style={{ marginTop: 8, fontSize: 12, color: "var(--yellow)" }}>還差 {fmtFull(remaining)}</div>}
-            </div>
-          );
-        })}
-      </div>
-
-      {showAdd && (
-        <Modal title="新增計劃支出" onClose={() => setShowAdd(false)}>
-          <div className="form-group">
-            <label>名稱</label>
-            <input placeholder="換手機..." value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
-          </div>
-          <div className="grid-2">
-            <div className="form-group">
-              <label>目標金額</label>
-              <input type="number" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
-            </div>
-            <div className="form-group">
-              <label>已存入</label>
-              <input type="number" value={form.saved} onChange={e => setForm(f => ({ ...f, saved: e.target.value }))} />
-            </div>
-          </div>
-          <div className="grid-2">
-            <div className="form-group">
-              <label>預計日期</label>
-              <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
-            </div>
-            <div className="form-group">
-              <label>優先級</label>
-              <select value={form.priority} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))}>
-                <option value="high">緊急</option>
-                <option value="medium">一般</option>
-                <option value="low">計劃</option>
-              </select>
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-            <button className="btn-ghost" onClick={() => setShowAdd(false)}>取消</button>
-            <button className="btn-primary" onClick={addExpense}>新增</button>
-          </div>
-        </Modal>
-      )}
+// ─── DEBTS ───
+function renderDebts(){
+  const el=document.getElementById('page-debts');
+  const owedToMe=db.debtRecords.filter(d=>d.type==='owed_to_me'&&!d.settled);
+  const iOwe=db.debtRecords.filter(d=>d.type==='i_owe'&&!d.settled);
+  const totalOwed=owedToMe.reduce((s,d)=>s+d.amount,0);
+  const totalOwe=iOwe.reduce((s,d)=>s+d.amount,0);
+  const debtRow=d=>`<div class="debt-row${d.settled?' settled':''}">
+    <div class="list-info">
+      <div class="list-name">${esc(d.person)}</div>
+      <div class="list-meta">${d.date}${d.note?' · '+esc(d.note):''}</div>
     </div>
-  );
+    <div class="mono" style="font-weight:700;margin-right:10px;color:${d.type==='owed_to_me'?'var(--green)':'var(--red)'}">${fmtFull(d.amount)}</div>
+    ${!d.settled?`<button class="btn btn-sm" onclick="settleDebt('${d.id}')">結清</button>`:`<span class="tag tag-green" style="font-size:11px">✓</span>`}
+  </div>`;
+  el.innerHTML=`
+  <div class="page-header">
+    <div class="page-title">代墊 / 借貸</div>
+    <button class="btn btn-sm" onclick="openAddDebt()">＋ 新增</button>
+  </div>
+  <div class="kpi-row" style="margin-bottom:16px">
+    <div class="kpi green"><div class="kpi-label">別人欠我</div><div class="kpi-value mono" style="font-size:18px;color:var(--green)">${fmtFull(totalOwed)}</div></div>
+    <div class="kpi red"><div class="kpi-label">我欠別人</div><div class="kpi-value mono" style="font-size:18px;color:var(--red)">${fmtFull(totalOwe)}</div></div>
+  </div>
+  ${owedToMe.length?`<div class="sec-hd">別人欠我</div>${owedToMe.map(debtRow).join('')}`:''}
+  ${iOwe.length?`<div class="sec-hd">我欠別人</div>${iOwe.map(debtRow).join('')}`:''}
+  ${!db.debtRecords.length?'<div style="text-align:center;padding:32px;color:var(--text3)">還沒有借貸記錄</div>':''}
+  ${db.debtRecords.filter(d=>d.settled).length?`<div class="sec-hd">已結清</div>${db.debtRecords.filter(d=>d.settled).map(debtRow).join('')}`:''}`;
 }
 
-// ============================================================
-// INCOME
-// ============================================================
-function Income({ data, setData }) {
-  const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState({ month: currentMonth(), amount: "", note: "", estimated: false });
-
-  const addIncome = () => {
-    if (!form.amount) return;
-    const existing = data.incomeHistory.findIndex(i => i.month === form.month);
-    const record = { ...form, id: "i" + Date.now(), amount: parseFloat(form.amount) };
-    if (existing >= 0) {
-      setData(d => ({ ...d, incomeHistory: d.incomeHistory.map((i, idx) => idx === existing ? record : i) }));
-    } else {
-      setData(d => ({ ...d, incomeHistory: [...d.incomeHistory, record].sort((a, b) => a.month.localeCompare(b.month)) }));
-    }
-    setShowAdd(false);
-    setForm({ month: currentMonth(), amount: "", note: "", estimated: false });
-  };
-
-  const sorted = [...data.incomeHistory].sort((a, b) => b.month.localeCompare(a.month));
-  const avg = data.incomeHistory.filter(i => !i.estimated).reduce((s, i, _, arr) => s + i.amount / arr.length, 0);
-
-  return (
-    <div className="page-pad scrollbar-thin" style={{ padding: 24, overflowY: "auto", height: "100%" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
-        <div>
-          <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>INCOME TRACKER</div>
-          <h1 style={{ fontSize: 22, fontWeight: 800 }}>收入管理</h1>
-        </div>
-        <button className="btn-primary" onClick={() => setShowAdd(true)}>+ 記錄收入</button>
+// ─── PLANNED ───
+function renderPlanned(){
+  const el=document.getElementById('page-planned');
+  const pending=db.plannedExpenses.filter(p=>!p.paid).sort((a,b)=>a.date.localeCompare(b.date));
+  const total=pending.reduce((s,p)=>s+p.amount,0);
+  el.innerHTML=`
+  <div class="page-header">
+    <div><div class="page-title">計劃支出</div></div>
+    <button class="btn btn-sm" onclick="openAddPlanned()">＋ 新增</button>
+  </div>
+  <div class="kpi full" style="margin-bottom:16px;border-color:rgba(196,122,0,.3)">
+    <div class="kpi-label">待支付總額</div>
+    <div class="kpi-value mono" style="color:var(--amber)">${fmtFull(total)}</div>
+  </div>
+  ${pending.map(p=>{
+    const overdue=p.date<today()&&!p.paid;
+    return `<div class="list-row">
+      <div class="list-info">
+        <div class="list-name">${esc(p.name)}</div>
+        <div class="list-meta">${p.date}${overdue?' <span style="color:var(--red)">逾期</span>':''}</div>
       </div>
+      <div class="mono" style="font-weight:700;color:var(--amber);margin-right:10px">${fmtFull(p.amount)}</div>
+      <button class="btn btn-sm" onclick="deletePlanned('${p.id}')">✕</button>
+    </div>`;
+  }).join('')}
+  ${!pending.length?'<div style="text-align:center;padding:32px;color:var(--text3)">沒有計劃支出</div>':''}`;
+}
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 24 }}>
-        <div className="card">
-          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>平均月收（實際）</div>
-          <div className="mono" style={{ fontSize: 20, color: "var(--green)" }}>{fmtFull(Math.round(avg))}</div>
-        </div>
-        <div className="card">
-          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>最近一個月</div>
-          <div className="mono" style={{ fontSize: 20, color: sorted[0]?.estimated ? "var(--yellow)" : "var(--green)" }}>
-            {fmtFull(sorted[0]?.amount || 0)}
-          </div>
-          {sorted[0]?.estimated && <span className="tag badge-yellow" style={{ fontSize: 10 }}>預估</span>}
-        </div>
-        <div className="card">
-          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>累積紀錄</div>
-          <div className="mono" style={{ fontSize: 20, color: "var(--blue)" }}>{data.incomeHistory.length} 個月</div>
-        </div>
+// ─── INCOME ───
+function renderIncome(){
+  const el=document.getElementById('page-income');
+  el.innerHTML=`
+  <div class="page-header">
+    <div class="page-title">收入管理</div>
+    <button class="btn btn-sm" onclick="openAddIncome()">＋ 記錄</button>
+  </div>
+  ${[...db.incomeHistory].reverse().map(i=>`
+    <div class="list-row">
+      <div class="list-info">
+        <div class="list-name">${esc(i.note||i.month)}</div>
+        <div class="list-meta">${i.month}${i.estimated?' <span style="color:var(--amber)">預估</span>':''}</div>
       </div>
+      <div class="mono" style="font-weight:700;color:var(--green)">${fmtFull(i.amount)}</div>
+    </div>`).join('')}
+  ${!db.incomeHistory.length?'<div style="text-align:center;padding:32px;color:var(--text3)">還沒有收入記錄</div>':''}`;
+}
 
-      <div className="card">
-        <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 16, color: "var(--text2)" }}>月收入歷史</div>
-        <div style={{ display: "flex", gap: 4, alignItems: "flex-end", height: 120, marginBottom: 16 }}>
-          {sorted.slice(0, 12).reverse().map((i, idx) => {
-            const maxAmt = Math.max(...data.incomeHistory.map(x => x.amount));
-            const h = (i.amount / maxAmt) * 100;
-            return (
-              <div key={i.id} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                <div style={{ fontSize: 9, color: "var(--text3)", textAlign: "center" }} className="mono">{fmtFull(i.amount).replace("NT$", "")}</div>
-                <div style={{ width: "100%", height: `${h}%`, background: i.estimated ? "var(--yellow)" : "var(--green)", borderRadius: "3px 3px 0 0", minHeight: 4, opacity: 0.8 }} />
-                <div style={{ fontSize: 9, color: "var(--text3)" }}>{i.month.slice(5)}</div>
-              </div>
-            );
-          })}
-        </div>
+// ─── ACCOUNTS ───
+function renderAccounts(){
+  const el=document.getElementById('page-accounts');
+  const total=db.accounts.reduce((s,a)=>s+a.balance,0);
+  el.innerHTML=`
+  <div class="page-header">
+    <div><div class="page-title">帳戶</div><div class="page-sub mono">${fmtFull(total)}</div></div>
+    <button class="btn btn-sm" onclick="openAddAcc()">＋ 新增</button>
+  </div>
+  ${db.accounts.map(a=>`
+    <div class="list-row">
+      <span style="font-size:24px">${a.icon}</span>
+      <div class="list-info"><div class="list-name">${esc(a.name)}</div></div>
+      <div class="mono" style="font-size:18px;font-weight:700;margin-right:10px">${fmtFull(a.balance)}</div>
+      <button class="btn btn-sm" onclick="openEditAcc('${a.id}')">編輯</button>
+    </div>`).join('')}`;
+}
 
-        {sorted.map(i => (
-          <div key={i.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: "1px solid var(--border)" }}>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 600 }}>{i.month}</div>
-              <div style={{ fontSize: 11, color: "var(--text3)" }}>{i.note}</div>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              {i.estimated && <span className="tag badge-yellow">預估</span>}
-              <span className="mono" style={{ fontSize: 16, color: "var(--green)" }}>{fmtFull(i.amount)}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {showAdd && (
-        <Modal title="記錄收入" onClose={() => setShowAdd(false)}>
-          <div className="form-group">
-            <label>月份</label>
-            <input type="month" value={form.month} onChange={e => setForm(f => ({ ...f, month: e.target.value }))} />
-          </div>
-          <div className="form-group">
-            <label>金額 (NT$)</label>
-            <input type="number" placeholder="50000" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
-          </div>
-          <div className="form-group">
-            <label>備註</label>
-            <input placeholder="薪水 + 加班費..." value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} />
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-            <input type="checkbox" id="est" checked={form.estimated} onChange={e => setForm(f => ({ ...f, estimated: e.target.checked }))} style={{ width: "auto" }} />
-            <label htmlFor="est" style={{ margin: 0, cursor: "pointer" }}>這是預估值（尚未確定）</label>
-          </div>
-          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-            <button className="btn-ghost" onClick={() => setShowAdd(false)}>取消</button>
-            <button className="btn-primary" onClick={addIncome}>儲存</button>
-          </div>
-        </Modal>
-      )}
+// ─── SETTINGS ───
+function renderSettings(){
+  const el=document.getElementById('page-settings');
+  el.innerHTML=`
+  <div class="page-header"><div class="page-title">設定</div></div>
+  <div class="card" style="margin-bottom:12px">
+    <div style="font-weight:700;margin-bottom:14px">分類管理</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+      ${Object.entries(db.categories).map(([name,c])=>`
+        <div style="padding:10px;background:var(--bg3);border-radius:10px;text-align:center;cursor:pointer" onclick="editCategory('${name}')">
+          <div style="font-size:22px">${c.icon}</div>
+          <div style="font-size:12px;font-weight:600;margin-top:4px">${esc(name)}</div>
+        </div>`).join('')}
     </div>
-  );
+    <button class="btn" style="width:100%;margin-top:12px" onclick="openAddCategory()">＋ 新增分類</button>
+  </div>
+  <div class="card" style="margin-bottom:12px">
+    <div style="font-weight:700;margin-bottom:12px">資料備份</div>
+    <button class="btn" style="width:100%;margin-bottom:8px" onclick="exportJSON()">📥 下載備份 (JSON)</button>
+    <div class="fg"><label>還原備份</label><input type="file" id="importFile" accept=".json" onchange="importJSON(this)"></div>
+  </div>
+  <div class="card">
+    <div style="font-weight:700;margin-bottom:12px;color:var(--red)">危險區域</div>
+    <button class="btn btn-red" style="width:100%" onclick="confirmAction('清除所有資料？此操作無法復原。',clearAll)">清除所有資料</button>
+  </div>`;
 }
 
-// ============================================================
-// ACCOUNTS
-// ============================================================
-function Accounts({ data, setData }) {
-  const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState({ name: "", type: "sub", balance: "", color: "#60a5fa" });
+// ═══════════════════════════
+// MODALS - ADD/EDIT
+// ═══════════════════════════
 
-  const addAccount = () => {
-    if (!form.name) return;
-    setData(d => ({ ...d, accounts: [...d.accounts, { ...form, id: "acc" + Date.now(), balance: parseFloat(form.balance) || 0 }] }));
-    setShowAdd(false);
-    setForm({ name: "", type: "sub", balance: "", color: "#60a5fa" });
-  };
-
-  const deleteAccount = (id) => setData(d => ({ ...d, accounts: d.accounts.filter(a => a.id !== id) }));
-  const updateBalance = (id, bal) => setData(d => ({ ...d, accounts: d.accounts.map(a => a.id === id ? { ...a, balance: parseFloat(bal) || 0 } : a) }));
-
-  const total = data.accounts.reduce((s, a) => s + a.balance, 0);
-
-  return (
-    <div className="page-pad scrollbar-thin" style={{ padding: 24, overflowY: "auto", height: "100%" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
-        <div>
-          <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>ACCOUNTS</div>
-          <h1 style={{ fontSize: 22, fontWeight: 800 }}>帳戶管理</h1>
-        </div>
-        <button className="btn-primary" onClick={() => setShowAdd(true)}>+ 新增帳戶</button>
-      </div>
-
-      <div className="card" style={{ marginBottom: 20, background: "linear-gradient(135deg, var(--accent)22, var(--card))" }}>
-        <div style={{ fontSize: 12, color: "var(--text3)", marginBottom: 8 }}>所有帳戶總計</div>
-        <div className="mono" style={{ fontSize: 32, color: "var(--green)", fontWeight: 500 }}>{fmtFull(total)}</div>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-        {data.accounts.map(a => (
-          <div key={a.id} className="card" style={{ borderLeft: `4px solid ${a.color}` }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 700 }}>{a.name}</div>
-                <span className="tag badge-blue" style={{ fontSize: 10, marginTop: 4 }}>
-                  {a.type === "main" ? "主帳戶" : a.type === "cash" ? "現金" : "副帳戶"}
-                </span>
-              </div>
-              {a.id !== data.settings.mainAccountId && (
-                <button className="btn-danger btn-sm" onClick={() => deleteAccount(a.id)}>✕</button>
-              )}
-            </div>
-            <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>餘額</div>
-            <input
-              type="number"
-              value={a.balance}
-              onChange={e => updateBalance(a.id, e.target.value)}
-              className="mono"
-              style={{ fontSize: 18, background: "var(--bg3)" }}
-            />
-          </div>
-        ))}
-      </div>
-
-      {showAdd && (
-        <Modal title="新增帳戶" onClose={() => setShowAdd(false)}>
-          <div className="form-group">
-            <label>帳戶名稱</label>
-            <input placeholder="富邦銀行" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
-          </div>
-          <div className="grid-2">
-            <div className="form-group">
-              <label>類型</label>
-              <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
-                <option value="main">主帳戶</option>
-                <option value="sub">副帳戶</option>
-                <option value="cash">現金</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label>初始餘額</label>
-              <input type="number" placeholder="0" value={form.balance} onChange={e => setForm(f => ({ ...f, balance: e.target.value }))} />
-            </div>
-          </div>
-          <div className="form-group">
-            <label>顏色</label>
-            <input type="color" value={form.color} onChange={e => setForm(f => ({ ...f, color: e.target.value }))} style={{ height: 40, padding: 4 }} />
-          </div>
-          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-            <button className="btn-ghost" onClick={() => setShowAdd(false)}>取消</button>
-            <button className="btn-primary" onClick={addAccount}>新增</button>
-          </div>
-        </Modal>
-      )}
-    </div>
-  );
+// TX
+let txEditId=null, txType='expense';
+function openAddTx(){
+  txEditId=null; txType='expense';
+  document.getElementById('txModalTitle').textContent='新增記帳';
+  document.getElementById('txDate').value=today();
+  document.getElementById('txAmount').value='';
+  document.getElementById('txNote').value='';
+  document.getElementById('txDeleteBtn').style.display='none';
+  setTxType('expense');
+  populateTxSelects();
+  openModal('txOverlay');
 }
-
-// ============================================================
-// GOOGLE SHEETS SYNC HOOK
-// ============================================================
-function useSheetsSync() {
-  const [webAppUrl, setWebAppUrlState] = useState(() => localStorage.getItem("sheetsWebAppUrl") || "");
-  const [syncLog, setSyncLog] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("syncLog") || "[]"); } catch { return []; }
-  });
-  const [syncing, setSyncing] = useState(false);
-
-  const setWebAppUrl = (url) => {
-    setWebAppUrlState(url);
-    localStorage.setItem("sheetsWebAppUrl", url);
-  };
-
-  const addLog = (entry) => {
-    setSyncLog(prev => {
-      const updated = [entry, ...prev].slice(0, 50);
-      localStorage.setItem("syncLog", JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  // 送單筆資料到 Sheets
-  const pushRow = useCallback(async (sheetName, row) => {
-    const url = localStorage.getItem("sheetsWebAppUrl");
-    if (!url) return;
-    try {
-      await fetch(url, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "appendRow", sheet: sheetName, row }),
-      });
-      addLog({ time: new Date().toLocaleTimeString(), sheet: sheetName, status: "✓", msg: `新增一筆到「${sheetName}」` });
-    } catch (e) {
-      addLog({ time: new Date().toLocaleTimeString(), sheet: sheetName, status: "✗", msg: `失敗: ${e.message}` });
-    }
-  }, []);
-
-  // 全量同步（覆寫整個 sheet）
-  const pushFullSync = useCallback(async (data) => {
-    const url = localStorage.getItem("sheetsWebAppUrl");
-    if (!url) { alert("請先設定 Web App URL！"); return; }
-    setSyncing(true);
-    try {
-      // 記帳
-      const txRows = data.transactions.map(t => {
-        const acc = t.accountId ? data.accounts.find(a => a.id === t.accountId)?.name : "";
-        const card = t.cardId ? data.creditCards.find(c => c.id === t.cardId)?.name : "";
-        return [t.date, t.amount, t.type === "income" ? "收入" : "支出", t.category, t.subcategory || "", t.note || "", acc || "", card || "", t.splitGroup || ""];
-      });
-      // 訂閱
-      const subRows = data.subscriptions.map(s => {
-        const card = data.creditCards.find(c => c.id === s.cardId)?.name || "";
-        const myShare = s.shared ? s.amount - s.sharedWith.reduce((a, p) => a + p.amount, 0) : s.amount;
-        return [s.name, s.amount, s.cycle, s.day, card, s.category, s.shared ? "是" : "否", myShare, s.active ? "啟用" : "暫停"];
-      });
-      // 借貸
-      const debtRows = data.debtRecords.map(d => [
-        d.type === "owed_to_me" ? "別人欠我" : "我欠別人", d.person, d.amount, d.date, d.note || "", d.settled ? "已結清" : "未結清"
-      ]);
-
-      const payload = {
-        action: "fullSync",
-        sheets: {
-          "記帳明細": { headers: ["日期","金額","類型","分類","子分類","備註","帳戶","信用卡","均攤群組"], rows: txRows },
-          "訂閱管理": { headers: ["名稱","金額","週期","扣款日","信用卡","分類","分帳","我的份額","狀態"], rows: subRows },
-          "借貸紀錄": { headers: ["類型","對象","金額","日期","備註","狀態"], rows: debtRows },
-        }
-      };
-
-      await fetch(url, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      addLog({ time: new Date().toLocaleTimeString(), sheet: "全部", status: "✓", msg: `全量同步完成（${txRows.length} 筆記帳, ${subRows.length} 筆訂閱, ${debtRows.length} 筆借貸）` });
-    } catch (e) {
-      addLog({ time: new Date().toLocaleTimeString(), sheet: "全部", status: "✗", msg: `同步失敗: ${e.message}` });
-    }
-    setSyncing(false);
-  }, []);
-
-  return { webAppUrl, setWebAppUrl, pushRow, pushFullSync, syncing, syncLog };
+function openEditTx(id){
+  const tx=db.transactions.find(t=>t.id===id); if(!tx)return;
+  txEditId=id; txType=tx.amount>0?'income':'expense';
+  document.getElementById('txModalTitle').textContent='編輯記帳';
+  document.getElementById('txDate').value=tx.date;
+  document.getElementById('txAmount').value=Math.abs(tx.amount);
+  document.getElementById('txNote').value=tx.note||'';
+  document.getElementById('txDeleteBtn').style.display='block';
+  document.getElementById('txEditId').value=id;
+  setTxType(txType);
+  populateTxSelects(tx.category, tx.accId, tx.ccId);
+  openModal('txOverlay');
 }
-
-// ============================================================
-// EXPORT / INTEGRATION
-// ============================================================
-function Export({ data, sync }) {
-  const [copied, setCopied] = useState("");
-  const [urlInput, setUrlInput] = useState(sync.webAppUrl);
-
-  const generateCSV = (type) => {
-    let rows = [];
-    let filename = "";
-    if (type === "transactions") {
-      rows = [["日期","金額","類型","分類","子分類","備註","帳戶","信用卡","均攤群組"]];
-      data.transactions.forEach(t => {
-        const acc = t.accountId ? data.accounts.find(a => a.id === t.accountId)?.name : "";
-        const card = t.cardId ? data.creditCards.find(c => c.id === t.cardId)?.name : "";
-        rows.push([t.date, t.amount, t.type === "income" ? "收入" : "支出", t.category, t.subcategory, t.note, acc, card, t.splitGroup || ""]);
-      });
-      filename = "transactions.csv";
-    } else if (type === "subscriptions") {
-      rows = [["名稱","金額","週期","扣款日","信用卡","分類","分帳","我的份額"]];
-      data.subscriptions.forEach(s => {
-        const card = data.creditCards.find(c => c.id === s.cardId)?.name || "";
-        const myShare = s.shared ? s.amount - s.sharedWith.reduce((a, p) => a + p.amount, 0) : s.amount;
-        rows.push([s.name, s.amount, s.cycle, s.day, card, s.category, s.shared ? "是" : "否", myShare]);
-      });
-      filename = "subscriptions.csv";
-    } else if (type === "debts") {
-      rows = [["類型","對象","金額","日期","備註","已結清"]];
-      data.debtRecords.forEach(d => {
-        rows.push([d.type === "owed_to_me" ? "別人欠我" : "我欠別人", d.person, d.amount, d.date, d.note, d.settled ? "是" : "否"]);
-      });
-      filename = "debts.csv";
-    }
-    const csv = rows.map(r => r.map(c => `"${c}"`).join(",")).join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = filename; a.click();
-  };
-
-  const gsScript = `const SPREADSHEET_ID = "貼上你的試算表ID";
-
-function doPost(e) {
-  try {
-    const payload = JSON.parse(e.postData.contents);
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-
-    if (payload.action === "appendRow") {
-      let sheet = ss.getSheetByName(payload.sheet);
-      if (!sheet) sheet = ss.insertSheet(payload.sheet);
-      sheet.appendRow(payload.row);
-    }
-
-    if (payload.action === "fullSync") {
-      Object.entries(payload.sheets).forEach(([sheetName, data]) => {
-        let sheet = ss.getSheetByName(sheetName);
-        if (!sheet) sheet = ss.insertSheet(sheetName);
-        sheet.clearContents();
-        sheet.appendRow(data.headers);
-        if (data.rows.length > 0) {
-          sheet.getRange(2, 1, data.rows.length, data.headers.length)
-               .setValues(data.rows);
-        }
-        // 凍結標題列、自動調整欄寬
-        sheet.setFrozenRows(1);
-        sheet.autoResizeColumns(1, data.headers.length);
-      });
-    }
-
-    return ContentService
-      .createTextOutput(JSON.stringify({ status: "ok" }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch(err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ status: "error", message: err.message }))
-      .setMimeType(ContentService.MimeType.JSON);
+function setTxType(type){
+  txType=type;
+  const e=document.getElementById('txTypeExpense'), i=document.getElementById('txTypeIncome');
+  if(type==='expense'){
+    e.style.background='var(--red-bg)'; e.style.color='var(--red)'; e.style.borderColor='rgba(208,48,96,.3)';
+    i.style.background='var(--card2)'; i.style.color='var(--text2)'; i.style.borderColor='var(--border2)';
+  } else {
+    i.style.background='var(--green-bg)'; i.style.color='var(--green)'; i.style.borderColor='rgba(10,138,104,.3)';
+    e.style.background='var(--card2)'; e.style.color='var(--text2)'; e.style.borderColor='var(--border2)';
   }
+  populateTxSelects();
+}
+function populateTxSelects(selCat, selAccId, selCcId){
+  const catEl=document.getElementById('txCategory');
+  const cats=Object.keys(db.categories);
+  catEl.innerHTML=cats.map(c=>`<option value="${c}"${c===(selCat||cats[0])?' selected':''}>${db.categories[c].icon} ${c}</option>`).join('');
+  updateSubcats(selCat);
+  const payEl=document.getElementById('txPay');
+  payEl.innerHTML=[
+    ...db.accounts.map(a=>`<option value="acc:${a.id}"${selAccId===a.id?' selected':''}>${a.icon} ${a.name}</option>`),
+    ...db.creditCards.map(c=>`<option value="cc:${c.id}"${selCcId===c.id?' selected':''}>${c.name}</option>`),
+  ].join('');
+}
+function updateSubcats(cat){
+  const c=cat||document.getElementById('txCategory').value;
+  const subs=db.categories[c]?.subs||[];
+  const el=document.getElementById('txSubcat');
+  el.innerHTML=subs.map(s=>`<option value="${s}">${s}</option>`).join('');
+  document.getElementById('txSubcatFg').style.display=subs.length?'block':'none';
+}
+function saveTx(){
+  const amt=parseFloat(document.getElementById('txAmount').value);
+  const date=document.getElementById('txDate').value;
+  const cat=document.getElementById('txCategory').value;
+  const sub=document.getElementById('txSubcat').value;
+  const note=document.getElementById('txNote').value.trim();
+  const pay=document.getElementById('txPay').value;
+  if(!date||isNaN(amt)){toast('請填寫日期和金額');return;}
+  const [payType,payId]=pay.split(':');
+  const amount=txType==='expense'?-Math.abs(amt):Math.abs(amt);
+  const tx={id:txEditId||uid(),date,amount,category:cat,subcategory:sub,note,type:txType,accId:payType==='acc'?payId:null,ccId:payType==='cc'?payId:null};
+  if(txEditId){const i=db.transactions.findIndex(t=>t.id===txEditId);db.transactions[i]=tx;}
+  else db.transactions.unshift(tx);
+  save();closeModal('txOverlay');renderPage(activePage);toast('✓ 已儲存');
+}
+function deleteTx(){
+  const id=document.getElementById('txEditId').value;
+  confirmAction('刪除這筆記帳？',()=>{
+    db.transactions=db.transactions.filter(t=>t.id!==id);
+    save();closeModal('txOverlay');renderPage(activePage);toast('已刪除');
+  });
 }
 
-// 允許 CORS（GET 用來測試連線）
-function doGet(e) {
-  return ContentService
-    .createTextOutput(JSON.stringify({ status: "ok", message: "Finance Tracker Script Ready" }))
-    .setMimeType(ContentService.MimeType.JSON);
-}`;
+// Budget
+function openAddBudget(){
+  const cats=Object.keys(db.categories);
+  showGenericModal('新增預算',`
+    <div class="fg"><label>分類</label><select id="bCat">${cats.map(c=>`<option>${c}</option>`).join('')}</select></div>
+    <div class="fg"><label>每月上限 (NT$)</label><input type="number" id="bLimit" inputmode="decimal" placeholder="5000"></div>
+  `,()=>{
+    const cat=document.getElementById('bCat').value, limit=parseFloat(document.getElementById('bLimit').value);
+    if(isNaN(limit)){toast('請填寫金額');return;}
+    db.budgets.push({id:uid(),category:cat,monthlyLimit:limit,color:'#'+Math.floor(Math.random()*0xffffff).toString(16).padStart(6,'0')});
+    save();closeGenericModal();renderBudget();toast('✓ 已新增');
+  });
+}
 
-  const copyText = (text, key) => {
-    const el = document.createElement("textarea");
-    el.value = text;
-    el.style.cssText = "position:fixed;top:0;left:0;opacity:0;pointer-events:none";
-    document.body.appendChild(el);
-    el.focus();
-    el.select();
-    try {
-      document.execCommand("copy");
-      setCopied(key);
-      setTimeout(() => setCopied(""), 2000);
-    } catch(e) {
-      navigator.clipboard?.writeText(text).then(() => {
-        setCopied(key);
-        setTimeout(() => setCopied(""), 2000);
-      });
-    }
-    document.body.removeChild(el);
-  };
-
-  const saveUrl = () => {
-    sync.setWebAppUrl(urlInput.trim());
-    alert("✓ URL 已儲存！");
-  };
-
-  return (
-    <div className="page-pad scrollbar-thin" style={{ padding: 24, overflowY: "auto", height: "100%" }}>
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 12, color: "var(--text3)", letterSpacing: 2, marginBottom: 4 }}>EXPORT & SYNC</div>
-        <h1 style={{ fontSize: 22, fontWeight: 800 }}>匯出 / 串接</h1>
-      </div>
-
-      {/* Google Sheets 串接設定 */}
-      <div className="card" style={{ marginBottom: 20, borderColor: sync.webAppUrl ? "var(--green)" : "var(--border)" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <div style={{ fontSize: 14, fontWeight: 700 }}>📊 Google Sheets 自動串接</div>
-          <span className={`tag ${sync.webAppUrl ? "badge-green" : "badge-red"}`}>
-            {sync.webAppUrl ? "✓ 已設定" : "未設定"}
-          </span>
-        </div>
-
-        {/* Step 1 */}
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: "var(--accent)", marginBottom: 8 }}>步驟 1 — 複製 Apps Script 代碼</div>
-          <div style={{ fontSize: 12, color: "var(--text2)", marginBottom: 10, lineHeight: 1.7 }}>
-            前往 <a href="https://script.google.com" target="_blank" style={{ color: "var(--accent)" }}>script.google.com</a> → 新增專案 → 把以下代碼貼進去（記得填入你的試算表 ID）
-          </div>
-          <div style={{ position: "relative" }}>
-            <pre style={{ background: "var(--bg3)", borderRadius: 8, padding: 16, fontSize: 11, color: "var(--text)", overflowX: "auto", lineHeight: 1.7, maxHeight: 280 }}>
-              {gsScript}
-            </pre>
-            <button className="btn-ghost btn-sm" onClick={() => copyText(gsScript, "gs")}
-              style={{ position: "absolute", top: 8, right: 8, background: "var(--card)" }}>
-              {copied === "gs" ? "✓ 已複製" : "📋 複製"}
-            </button>
-          </div>
-        </div>
-
-        {/* Step 2 */}
-        <div style={{ marginBottom: 20, padding: 14, background: "var(--bg3)", borderRadius: 10 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: "var(--accent)", marginBottom: 10 }}>步驟 2 — 部署為 Web App</div>
-          {[
-            "點右上角「部署」→「新增部署作業」",
-            "類型選「網頁應用程式」",
-            "執行身分：選「我」",
-            "誰可以存取：選「所有人」",
-            "點「部署」，複製產生的 Web App URL",
-          ].map((s, i) => (
-            <div key={i} style={{ display: "flex", gap: 10, marginBottom: 6, fontSize: 13 }}>
-              <span style={{ width: 20, height: 20, background: "var(--accent)", color: "white", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{i+1}</span>
-              <span style={{ color: "var(--text)" }}>{s}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Step 3 */}
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: "var(--accent)", marginBottom: 8 }}>步驟 3 — 貼上 URL 並儲存</div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <input
-              placeholder="https://script.google.com/macros/s/.../exec"
-              value={urlInput}
-              onChange={e => setUrlInput(e.target.value)}
-              style={{ fontFamily: "monospace", fontSize: 12 }}
-            />
-            <button className="btn-primary" style={{ whiteSpace: "nowrap" }} onClick={saveUrl}>儲存</button>
-          </div>
-        </div>
-
-        {/* Sync actions */}
-        {sync.webAppUrl && (
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <button className="btn-primary" onClick={() => sync.pushFullSync(data)} disabled={sync.syncing}
-              style={{ background: "var(--green)", opacity: sync.syncing ? 0.6 : 1 }}>
-              {sync.syncing ? "⏳ 同步中..." : "🔄 立即全量同步"}
-            </button>
-            <div style={{ fontSize: 12, color: "var(--text2)", alignSelf: "center" }}>
-              之後每次新增記帳、訂閱、借貸都會自動推送
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Sync Log */}
-      {sync.syncLog.length > 0 && (
-        <div className="card" style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>📋 同步紀錄</div>
-          <div style={{ maxHeight: 200, overflowY: "auto" }} className="scrollbar-thin">
-            {sync.syncLog.map((log, i) => (
-              <div key={i} style={{ display: "flex", gap: 10, padding: "6px 0", borderBottom: "1px solid var(--border)", fontSize: 12 }}>
-                <span style={{ color: "var(--text3)", width: 70, flexShrink: 0 }}>{log.time}</span>
-                <span style={{ color: log.status === "✓" ? "var(--green)" : "var(--red)", width: 16 }}>{log.status}</span>
-                <span style={{ color: "var(--text2)" }}>{log.msg}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* CSV Export */}
-      <div className="card" style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 16 }}>📥 手動匯出 CSV</div>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <button className="btn-ghost" onClick={() => generateCSV("transactions")}>記帳明細</button>
-          <button className="btn-ghost" onClick={() => generateCSV("subscriptions")}>訂閱清單</button>
-          <button className="btn-ghost" onClick={() => generateCSV("debts")}>借貸紀錄</button>
-        </div>
-      </div>
-
-      {/* JSON Backup */}
-      <div className="card">
-        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>💾 完整資料備份 (JSON)</div>
-        <div style={{ fontSize: 12, color: "var(--text2)", marginBottom: 12 }}>備份所有資料，之後可還原</div>
-        <button className="btn-ghost" onClick={() => {
-          const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a"); a.href = url; a.download = `finance-backup-${today()}.json`; a.click();
-        }}>下載完整備份</button>
-      </div>
+// CC
+function openAddCC(){
+  showGenericModal('新增信用卡',`
+    <div class="fg"><label>名稱</label><input type="text" id="cName" placeholder="玉山卡"></div>
+    <div class="fg"><label>額度</label><input type="number" id="cLimit" inputmode="decimal" placeholder="50000"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fg"><label>結帳日</label><input type="number" id="cBill" inputmode="numeric" placeholder="25"></div>
+      <div class="fg"><label>繳款日</label><input type="number" id="cPay" inputmode="numeric" placeholder="15"></div>
     </div>
-  );
+  `,()=>{
+    const name=document.getElementById('cName').value.trim(), limit=parseFloat(document.getElementById('cLimit').value);
+    const bill=parseInt(document.getElementById('cBill').value), pay=parseInt(document.getElementById('cPay').value);
+    if(!name||isNaN(limit)){toast('請填寫完整');return;}
+    db.creditCards.push({id:uid(),name,limit,billingDay:bill||25,payDay:pay||15,color:'#'+Math.floor(Math.random()*0xffffff).toString(16).padStart(6,'0')});
+    save();closeGenericModal();renderCards();toast('✓ 已新增');
+  });
+}
+function openEditCC(id){
+  const cc=db.creditCards.find(c=>c.id===id); if(!cc)return;
+  showGenericModal('編輯信用卡',`
+    <div class="fg"><label>名稱</label><input type="text" id="cName" value="${esc(cc.name)}"></div>
+    <div class="fg"><label>額度</label><input type="number" id="cLimit" inputmode="decimal" value="${cc.limit}"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fg"><label>結帳日</label><input type="number" id="cBill" inputmode="numeric" value="${cc.billingDay}"></div>
+      <div class="fg"><label>繳款日</label><input type="number" id="cPay" inputmode="numeric" value="${cc.payDay}"></div>
+    </div>
+    <button class="btn btn-red" style="width:100%;margin-top:4px" onclick="deleteCC('${id}')">刪除這張卡</button>
+  `,()=>{
+    cc.name=document.getElementById('cName').value.trim();
+    cc.limit=parseFloat(document.getElementById('cLimit').value)||cc.limit;
+    cc.billingDay=parseInt(document.getElementById('cBill').value)||cc.billingDay;
+    cc.payDay=parseInt(document.getElementById('cPay').value)||cc.payDay;
+    save();closeGenericModal();renderCards();toast('✓ 已儲存');
+  });
+}
+function deleteCC(id){ confirmAction('刪除這張信用卡？',()=>{ db.creditCards=db.creditCards.filter(c=>c.id!==id); save();closeGenericModal();renderCards(); }); }
+
+// Subscriptions
+function openAddSub(){
+  showGenericModal('新增訂閱',`
+    <div class="fg"><label>名稱</label><input type="text" id="sName" placeholder="Netflix"></div>
+    <div class="fg"><label>金額/月</label><input type="number" id="sAmt" inputmode="decimal" placeholder="270"></div>
+    <div class="fg"><label>扣款日</label><input type="number" id="sDay" inputmode="numeric" placeholder="15"></div>
+    <div class="fg"><label>扣款方式</label><select id="sCc"><option value="">現金</option>${db.creditCards.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select></div>
+    <div class="fg"><label>分類</label><input type="text" id="sCat" value="娛樂"></div>
+  `,()=>{
+    const name=document.getElementById('sName').value.trim(), amt=parseFloat(document.getElementById('sAmt').value);
+    if(!name||isNaN(amt)){toast('請填寫完整');return;}
+    db.subscriptions.push({id:uid(),name,amount:amt,day:parseInt(document.getElementById('sDay').value)||1,ccId:document.getElementById('sCc').value||null,category:document.getElementById('sCat').value||'其他',active:true});
+    save();closeGenericModal();renderSubs();toast('✓ 已新增');
+  });
+}
+function toggleSub(id){ const s=db.subscriptions.find(x=>x.id===id);if(s){s.active=!s.active;save();renderSubs();} }
+
+// Debt
+function openAddDebt(){
+  showGenericModal('新增借貸',`
+    <div class="fg"><label>類型</label>
+      <select id="dType"><option value="owed_to_me">別人欠我</option><option value="i_owe">我欠別人</option></select>
+    </div>
+    <div class="fg"><label>對象</label><input type="text" id="dPerson" placeholder="姓名"></div>
+    <div class="fg"><label>金額</label><input type="number" id="dAmt" inputmode="decimal" placeholder="500"></div>
+    <div class="fg"><label>日期</label><input type="date" id="dDate" value="${today()}"></div>
+    <div class="fg"><label>備注</label><input type="text" id="dNote" placeholder="說明..."></div>
+  `,()=>{
+    const person=document.getElementById('dPerson').value.trim(), amt=parseFloat(document.getElementById('dAmt').value);
+    if(!person||isNaN(amt)){toast('請填寫完整');return;}
+    db.debtRecords.push({id:uid(),type:document.getElementById('dType').value,person,amount:amt,date:document.getElementById('dDate').value,note:document.getElementById('dNote').value.trim(),settled:false});
+    save();closeGenericModal();renderDebts();toast('✓ 已新增');
+  });
+}
+function settleDebt(id){ const d=db.debtRecords.find(x=>x.id===id);if(d){d.settled=true;save();renderDebts();toast('✓ 已結清');} }
+
+// Planned
+function openAddPlanned(){
+  showGenericModal('新增計劃支出',`
+    <div class="fg"><label>名稱</label><input type="text" id="pName" placeholder="換機車輪胎"></div>
+    <div class="fg"><label>金額</label><input type="number" id="pAmt" inputmode="decimal" placeholder="2500"></div>
+    <div class="fg"><label>預計日期</label><input type="date" id="pDate" value="${today()}"></div>
+  `,()=>{
+    const name=document.getElementById('pName').value.trim(), amt=parseFloat(document.getElementById('pAmt').value);
+    if(!name||isNaN(amt)){toast('請填寫完整');return;}
+    db.plannedExpenses.push({id:uid(),name,amount:amt,date:document.getElementById('pDate').value,paid:false});
+    save();closeGenericModal();renderPlanned();toast('✓ 已新增');
+  });
+}
+function deletePlanned(id){ db.plannedExpenses=db.plannedExpenses.filter(p=>p.id!==id);save();renderPlanned(); }
+
+// Income
+function openAddIncome(){
+  showGenericModal('記錄收入',`
+    <div class="fg"><label>月份</label><input type="month" id="iMonth" value="${curMonth()}"></div>
+    <div class="fg"><label>金額</label><input type="number" id="iAmt" inputmode="decimal" placeholder="52000"></div>
+    <div class="fg"><label>備注</label><input type="text" id="iNote" placeholder="三月薪水"></div>
+  `,()=>{
+    const amt=parseFloat(document.getElementById('iAmt').value);
+    if(isNaN(amt)){toast('請填寫金額');return;}
+    db.incomeHistory.push({id:uid(),month:document.getElementById('iMonth').value,amount:amt,note:document.getElementById('iNote').value.trim()});
+    save();closeGenericModal();renderIncome();toast('✓ 已記錄');
+  });
 }
 
-// ============================================================
-// MAIN APP
-// ============================================================
-function App() {
-  const [data, setData] = useLocalStorage("financeData", initialData);
-  const [activeTab, setActiveTab] = useState("dashboard");
-  const sync = useSheetsSync();
+// Accounts
+function openAddAcc(){
+  showGenericModal('新增帳戶',`
+    <div class="fg"><label>名稱</label><input type="text" id="aName" placeholder="玉山銀行"></div>
+    <div class="fg"><label>餘額</label><input type="number" id="aBal" inputmode="decimal" placeholder="0"></div>
+    <div class="fg"><label>圖示</label><input type="text" id="aIcon" value="🏦"></div>
+  `,()=>{
+    const name=document.getElementById('aName').value.trim(), bal=parseFloat(document.getElementById('aBal').value)||0;
+    if(!name){toast('請填寫名稱');return;}
+    db.accounts.push({id:uid(),name,balance:bal,icon:document.getElementById('aIcon').value||'🏦'});
+    save();closeGenericModal();renderAccounts();toast('✓ 已新增');
+  });
+}
+function openEditAcc(id){
+  const a=db.accounts.find(x=>x.id===id); if(!a)return;
+  showGenericModal('編輯帳戶',`
+    <div class="fg"><label>名稱</label><input type="text" id="aName" value="${esc(a.name)}"></div>
+    <div class="fg"><label>餘額</label><input type="number" id="aBal" inputmode="decimal" value="${a.balance}"></div>
+    <div class="fg"><label>圖示</label><input type="text" id="aIcon" value="${a.icon}"></div>
+    <button class="btn btn-red" style="width:100%;margin-top:4px" onclick="deleteAcc('${id}')">刪除帳戶</button>
+  `,()=>{
+    a.name=document.getElementById('aName').value.trim()||a.name;
+    a.balance=parseFloat(document.getElementById('aBal').value)||0;
+    a.icon=document.getElementById('aIcon').value||a.icon;
+    save();closeGenericModal();renderAccounts();toast('✓ 已儲存');
+  });
+}
+function deleteAcc(id){ confirmAction('刪除帳戶？',()=>{ db.accounts=db.accounts.filter(a=>a.id!==id);save();closeGenericModal();renderAccounts(); }); }
 
-  // 包裝 setData，新增記帳時自動推送
-  const setDataWithSync = useCallback((updater) => {
-    setData(prev => {
-      const next = typeof updater === "function" ? updater(prev) : updater;
+// Categories
+function openAddCategory(){
+  showGenericModal('新增分類',`
+    <div class="fg"><label>名稱</label><input type="text" id="catName" placeholder="美食"></div>
+    <div class="fg"><label>圖示</label><input type="text" id="catIcon" value="📦"></div>
+  `,()=>{
+    const name=document.getElementById('catName').value.trim();
+    if(!name){toast('請填寫名稱');return;}
+    db.categories[name]={icon:document.getElementById('catIcon').value||'📦',subs:[]};
+    save();closeGenericModal();renderSettings();toast('✓ 已新增');
+  });
+}
+function editCategory(name){
+  const c=db.categories[name]; if(!c)return;
+  showGenericModal(`編輯分類：${name}`,`
+    <div class="fg"><label>圖示</label><input type="text" id="catIcon" value="${c.icon}"></div>
+    <div class="fg"><label>子分類（每行一個）</label><textarea id="catSubs">${(c.subs||[]).join('\n')}</textarea></div>
+    <button class="btn btn-red" style="width:100%;margin-top:4px" onclick="deleteCategory('${name}')">刪除分類</button>
+  `,()=>{
+    c.icon=document.getElementById('catIcon').value||c.icon;
+    c.subs=document.getElementById('catSubs').value.split('\n').map(s=>s.trim()).filter(Boolean);
+    save();closeGenericModal();renderSettings();toast('✓ 已儲存');
+  });
+}
+function deleteCategory(name){ confirmAction(`刪除「${name}」分類？`,()=>{ delete db.categories[name];save();closeGenericModal();renderSettings(); }); }
 
-      // 偵測新增的 transaction
-      if (next.transactions.length > prev.transactions.length) {
-        const newTx = next.transactions[0];
-        const acc = newTx.accountId ? next.accounts.find(a => a.id === newTx.accountId)?.name : "";
-        const card = newTx.cardId ? next.creditCards.find(c => c.id === newTx.cardId)?.name : "";
-        sync.pushRow("記帳明細", [
-          newTx.date, newTx.amount, newTx.type === "income" ? "收入" : "支出",
-          newTx.category, newTx.subcategory || "", newTx.note || "",
-          acc || "", card || "", newTx.splitGroup || ""
-        ]);
-      }
-      // 偵測新增的 subscription
-      if (next.subscriptions.length > prev.subscriptions.length) {
-        const s = next.subscriptions[next.subscriptions.length - 1];
-        const card = next.creditCards.find(c => c.id === s.cardId)?.name || "";
-        const myShare = s.shared ? s.amount - s.sharedWith.reduce((a, p) => a + p.amount, 0) : s.amount;
-        sync.pushRow("訂閱管理", [s.name, s.amount, s.cycle, s.day, card, s.category, s.shared ? "是" : "否", myShare, "啟用"]);
-      }
-      // 偵測新增的 debt
-      if (next.debtRecords.length > prev.debtRecords.length) {
-        const d = next.debtRecords[next.debtRecords.length - 1];
-        sync.pushRow("借貸紀錄", [
-          d.type === "owed_to_me" ? "別人欠我" : "我欠別人",
-          d.person, d.amount, d.date, d.note || "", "未結清"
-        ]);
-      }
+// Export/Import
+function exportJSON(){
+  const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`finance-backup-${today()}.json`;a.click();
+}
+function importJSON(input){
+  const file=input.files[0]; if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{try{db=JSON.parse(e.target.result);save();renderPage(activePage);toast('✓ 已還原備份');}catch{toast('❌ 檔案格式錯誤');}};
+  r.readAsText(file);
+}
+function clearAll(){ localStorage.removeItem(KEY);location.reload(); }
 
-      return next;
-    });
-  }, [setData, sync]);
+// ═══════════════════════════
+// GENERIC MODAL
+// ═══════════════════════════
+let _genericOk=null;
+function showGenericModal(title, bodyHtml, onOk){
+  _genericOk=onOk;
+  let el=document.getElementById('_gModal');
+  if(!el){
+    el=document.createElement('div');el.id='_gModal';el.className='overlay';
+    el.innerHTML='<div class="modal"><div class="modal-handle"></div><div class="modal-title" id="_gTitle"></div><div id="_gBody"></div><div class="modal-footer"><button class="btn" onclick="closeGenericModal()">取消</button><button class="btn-primary" onclick="if(_genericOk)_genericOk()">儲存</button></div></div>';
+    document.body.appendChild(el);
+    el.onclick=e=>{if(e.target===el)closeGenericModal();};
+  }
+  document.getElementById('_gTitle').textContent=title;
+  document.getElementById('_gBody').innerHTML=bodyHtml;
+  el.classList.add('open');
+}
+function closeGenericModal(){ const el=document.getElementById('_gModal');if(el)el.classList.remove('open'); }
 
-  const renderPage = () => {
-    switch (activeTab) {
-      case "dashboard": return <Dashboard data={data} />;
-      case "transactions": return <Transactions data={data} setData={setDataWithSync} />;
-      case "budget": return <Budget data={data} setData={setDataWithSync} />;
-      case "cards": return <CreditCards data={data} setData={setDataWithSync} />;
-      case "subscriptions": return <Subscriptions data={data} setData={setDataWithSync} />;
-      case "debts": return <Debts data={data} setData={setDataWithSync} />;
-      case "planned": return <PlannedExpenses data={data} setData={setDataWithSync} />;
-      case "income": return <Income data={data} setData={setDataWithSync} />;
-      case "accounts": return <Accounts data={data} setData={setDataWithSync} />;
-      case "export": return <Export data={data} sync={sync} />;
-      default: return null;
-    }
-  };
-
-  return (
-    <>
-      
-      <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-        {/* Sidebar */}
-        <div className="sidebar-desktop" style={{ width: 200, background: "var(--bg2)", borderRight: "1px solid var(--border)", display: "flex", flexDirection: "column", flexShrink: 0 }}>
-          <div style={{ padding: "20px 16px 16px", borderBottom: "1px solid var(--border)" }}>
-            <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: -0.5 }}>財務管理</div>
-            <div style={{ fontSize: 10, color: "var(--text3)", marginTop: 2, letterSpacing: 2 }}>FINANCE TRACKER</div>
-          </div>
-          <nav style={{ flex: 1, padding: "12px 8px", overflowY: "auto" }}>
-            {navItems.map(item => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  padding: "9px 12px",
-                  marginBottom: 2,
-                  borderRadius: 8,
-                  background: activeTab === item.id ? "var(--accent)" : "transparent",
-                  color: activeTab === item.id ? "white" : "var(--text)",
-                  fontSize: 13,
-                  fontWeight: activeTab === item.id ? 700 : 500,
-                  textAlign: "left",
-                  cursor: "pointer",
-                  border: "none",
-                  transition: "all 0.15s",
-                }}
-                onMouseEnter={e => { if (activeTab !== item.id) e.currentTarget.style.background = "var(--bg3)"; }}
-                onMouseLeave={e => { if (activeTab !== item.id) e.currentTarget.style.background = "transparent"; }}
-              >
-                <span style={{ fontSize: 16, opacity: 0.9 }}>{item.icon}</span>
-                {item.label}
-              </button>
-            ))}
-          </nav>
-          <div style={{ padding: 12, borderTop: "1px solid var(--border)", fontSize: 10, color: "var(--text3)", textAlign: "center" }}>
-            資料儲存於瀏覽器本地
-          </div>
-        </div>
-
-        {/* Main */}
-        <div className="main-content-area" style={{ flex: 1, overflow: "hidden", background: "var(--bg)" }}>
-          {renderPage()}
-        </div>
-      </div>
-
-      {/* Mobile bottom nav */}
-      <nav className="mobile-nav">
-        {navItems.map(item => (
-          <button
-            key={item.id}
-            className={activeTab === item.id ? "active" : ""}
-            onClick={() => setActiveTab(item.id)}
-          >
-            <span className="mni">{item.icon}</span>
-            <span className="mnl">{item.label}</span>
-          </button>
-        ))}
-      </nav>
-    </>
-  );
+// ═══════════════════════════
+// CONFIRM
+// ═══════════════════════════
+let _confirmFn=null;
+function confirmAction(msg, fn){
+  _confirmFn=fn;
+  document.getElementById('confirmMsg').textContent=msg;
+  document.getElementById('confirmOkBtn').onclick=()=>{closeModal('confirmOverlay');if(_confirmFn)_confirmFn();};
+  openModal('confirmOverlay');
 }
 
-
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
-  </script>
+// ═══════════════════════════
+// INIT
+// ═══════════════════════════
+renderDashboard();
+</script>
 </body>
 </html>
